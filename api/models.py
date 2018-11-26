@@ -18,9 +18,9 @@ class Election(models.Model):
 class Notification(models.Model):
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='notifiactions')
 
-    sent = models.BooleanField()
+    sent = models.BooleanField(default=False)
     code = models.CharField(max_length=100)
-    used = models.BooleanField()
+    used = models.BooleanField(default=False)
 
 
 class Vote(models.Model):
