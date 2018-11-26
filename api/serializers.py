@@ -14,21 +14,21 @@ class ElectionSerializers(serializers.ModelSerializer):
     class Meta:
         model = Election
         fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'vote_counts')
-        read_only_field = ('id', 'vote_counts')
+        read_only_fields = ('id', 'vote_counts')
 
 
 class NotificationSerializers(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ('id', 'election', 'sent', 'code', 'used')
-        read_only_field = ('id',)
+        read_only_fields = ('id',)
 
 
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
         fields = ('id', 'notification', 'id_student')
-        read_only_field = ('id',)
+        read_only_fields = ('id',)
 
 
 class ScoreSerializer(serializers.ModelSerializer):
