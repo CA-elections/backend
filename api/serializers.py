@@ -2,22 +2,103 @@ from rest_framework import serializers, validators
 from .models import Candidate, Election, Notification, Vote, Score
 
 
-class CandidateSerializer(serializers.ModelSerializer):
+class CandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = ('id', 'annotation', 'name', 'surname', 'is_student', 'elections')
-        read_only_fields = ('id', 'elections')
-        depth = 1
+        fields = ('id', 'annotation', 'name', 'surname', 'is_student')
 
 
-class ElectionSerializers(serializers.ModelSerializer):
+class CandidateReadSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+        return {
+            'is_student': instance.is_student,
+            'name': instance.name,
+            'surname': instance.surname,
+            'annotation': instance.annotation,
+            'elections': [ElectionReadSerializer(score.election).data for score in Score.objects.filter(candidate=instance)],
+        }
+
+    def to_internal_value(self, data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
+
+class ElectionWriteSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        candidates_data = validated_data.pop('candidates')
+        election = Election.objects.create(**validated_data)
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=election,
+            )
+        return election
+
+    def update(self, instance, validated_data):
+        candidates_data = validated_data.pop('candidates')
+        for score in Score.objects.filter(election=instance):
+            if score.candidate.id not in candidates_data:
+                score.candidate.delete()
+
+            candidates_data = list(filter(lambda x: x != score.candidate.id, candidates_data))
+
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=instance,
+            )
+
+        instance.date_start = validated_data.get('date_start', instance.date_start)
+        instance.date_end = validated_data.get('date_end', instance.date_end)
+        instance.is_student = validated_data.get('is_student', instance.is_student)
+        instance.name = validated_data.get('name', instance.name)
+        instance.name = validated_data.get('name', instance.name)
+        instance.save()
+
+        return instance
+
     class Meta:
         model = Election
         fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates')
-        read_only_fields = ('id', 'candidates')
 
 
-class NotificationSerializers(serializers.ModelSerializer):
+class ElectionReadSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+        return {
+            'date_start': instance.date_start,
+            'date_end': instance.date_end,
+            'is_student': instance.is_student,
+            'name': instance.name,
+            'candidates': [
+                {
+                    'id': score.candidate.id,
+                    'name': score.candidate.name,
+                    'surname': score.candidate.surname,
+                    'is_student': score.candidate.is_student,
+                    'annotation': score.candidate.annotation,
+                    'votes': score.votes,
+                } for score in Score.objects.filter(election=instance)],
+        }
+
+    def to_internal_value(self, data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
+
+class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = ('id', 'election', 'sent', 'code', 'used')
