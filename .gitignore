@@ -6,3 +6,9 @@ pyenv/
 
 # python
 *.pyc
+
+# django
+api/migrations/
+
+# database
+*.sqlite3
