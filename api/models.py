@@ -4,6 +4,7 @@ from django.db import models
 class Candidate(models.Model):
     name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
+    annotation = models.CharField(max_length=3000)
     is_student = models.BooleanField()
 
 
