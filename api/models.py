@@ -30,7 +30,7 @@ class Vote(models.Model):
 
 
 class Score(models.Model):
-    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='scores')
-    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='vote_counts')
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='elections')
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='candidates')
 
     votes = models.IntegerField(default=0)
