@@ -11,4 +11,7 @@ RUN pip install --no-cache-dir -r /src/requirements.txt
 
 ADD . /src/
 
-CMD ["python", "/src/Elections/manage.py", "runserver", "0.0.0.0:8000"]
+#RUN python /src/DockerTest/manage.py migrate
+
+CMD ["python", "/src/DockerTest/manage.py" , "runserver"]
+EXPOSE 8000:8000
