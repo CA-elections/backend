@@ -5,16 +5,16 @@ from .models import Candidate, Election, Notification, Vote, Score
 class CandidateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = ('id', 'annotation', 'name', 'surname', 'is_student', 'scores')
-        read_only_fields = ('id', 'scores')
+        fields = ('id', 'annotation', 'name', 'surname', 'is_student', 'elections')
+        read_only_fields = ('id', 'elections')
         depth = 1
 
 
 class ElectionSerializers(serializers.ModelSerializer):
     class Meta:
         model = Election
-        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'vote_counts')
-        read_only_fields = ('id', 'vote_counts')
+        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates')
+        read_only_fields = ('id', 'candidates')
 
 
 class NotificationSerializers(serializers.ModelSerializer):
