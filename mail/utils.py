@@ -22,7 +22,7 @@ def send_emails_with_code(election=None):
                                                     election=election)
     for n in notifications:
         codes = ""
-        if not len(n.votes):
+        if not n.votes.count():
             continue
         for v in n.votes.all():
             codes += n.code
