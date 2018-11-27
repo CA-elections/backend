@@ -5,7 +5,7 @@ import datetime
 import bakalari_reader
 
 
-def send_emails():
+def send_emails_with_code():
     now = datetime.datetime.now()
     for n in Notification.objects.filter(sent=False,
                                          election__date_end__gt=now,
@@ -18,3 +18,7 @@ def send_emails():
             msg.send()
             n.sent = True
             n.save()
+
+
+def send_emails_with_results():
+    raise NotImplementedError
