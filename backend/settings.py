@@ -115,9 +115,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 
+DEFAULT_FROM_EMAIL = 'noreply@gjk.cz'
 EMAIL_HOST_USER = 'cavolbymail@gmail.com'
 EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
