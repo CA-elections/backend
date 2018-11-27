@@ -26,4 +26,3 @@ class CandidateTests(APITestCase):
             self.assertEqual(request_data["name"], instance.name)
             self.assertEqual(request_data["surname"], instance.surname)
             self.assertEqual(request_data["is_student"], instance.is_student)
-
