@@ -1,5 +1,5 @@
 from rest_framework import generics, permissions, views, response, exceptions, status, pagination, viewsets
-from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, ElectionReadSerializer, NotificationSerializer, VoteSerializer, ScoreSerializer
+from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, ScoreSerializer
 from .models import Candidate, Election, Notification, Vote, Score
 
 
@@ -44,13 +44,13 @@ class ElectionDetails(generics.RetrieveUpdateDestroyAPIView):
 class NotificationList(generics.ListCreateAPIView):
 
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    get_serializer_class = get_serializer_getter(NotificationWriteSerializer, NotificationReadSerializer)
 
 
 class NotificationDetails(generics.RetrieveUpdateDestroyAPIView):
 
     queryset = Notification.objects.all()
-    serializer_class = NotificationSerializer
+    get_serializer_class = get_serializer_getter(NotificationWriteSerializer, NotificationReadSerializer)
 
 
 class VoteList(generics.ListCreateAPIView):
