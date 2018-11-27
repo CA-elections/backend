@@ -1,4 +1,5 @@
 from django.core.mail import EmailMessage
+from smtplib import SMTPException
 from api.models import Notification
 from django.conf import settings
 import datetime
@@ -30,9 +31,13 @@ def send_emails_with_code(election=None):
                                to=[bakalari_reader.get_student_email(v.id_student)])
         else:
             msg = EmailMessage(settings.EMAIL_SUBJECT, n.code, to=[bakalari_reader.get_parent_email(v.id_student)])
-        msg.send()
-        n.sent = True
-        n.save()
+        try:
+            msg.send()
+        except SMTPException:
+            pass
+        else:
+            n.sent = True
+            n.save()
 
 
 def send_emails_with_results(election=None):
