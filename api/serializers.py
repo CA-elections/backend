@@ -47,6 +47,7 @@ class CandidateReadSerializer(serializers.BaseSerializer):
 
 
 class ElectionWriteSerializer(serializers.ModelSerializer):
+    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
 
     def create(self, validated_data):
         candidates_data = validated_data.pop('candidates')
@@ -76,14 +77,14 @@ class ElectionWriteSerializer(serializers.ModelSerializer):
         instance.date_end = validated_data.get('date_end', instance.date_end)
         instance.is_student = validated_data.get('is_student', instance.is_student)
         instance.name = validated_data.get('name', instance.name)
-        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
         instance.save()
 
         return instance
 
     class Meta:
         model = Election
-        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates')
+        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates', 'description')
 
 
 class ElectionReadSerializer(serializers.BaseSerializer):
@@ -96,6 +97,7 @@ class ElectionReadSerializer(serializers.BaseSerializer):
             'is_student': instance.is_student,
             'name': instance.name,
             'votes': Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+            'description': instance.description,
             'candidates': [
                 {
                     'id': score.candidate.id,
@@ -203,6 +205,7 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
             'date_start': instance.date_start,
             'date_end': instance.date_end,
             'is_student': instance.is_student,
+            'description': instance.description,
             'name': instance.name,
         }
 
@@ -225,6 +228,7 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
             'date_end': instance.date_end,
             'is_student': instance.is_student,
             'name': instance.name,
+            'description': instance.description,
             'candidates': [
                 {
                     'id': score.candidate.id,
@@ -232,7 +236,7 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
                     'annotation': score.candidate.annotation,
-                    'percents': score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+                    'percents': 0 if not Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
                 } for score in Score.objects.filter(election=instance)],
         }
 
