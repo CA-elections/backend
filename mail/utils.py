@@ -3,10 +3,13 @@ from api.models import Notification
 from django.conf import settings
 import datetime
 import bakalari_reader
+from pytz import timezone
+
+tz = timezone(settings.TIME_ZONE)
 
 
 def send_emails_with_code(election=None):
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(tz)
     if election is None:
         notifications = Notification.objects.filter(sent=False,
                                                     election__date_end__gt=now,
