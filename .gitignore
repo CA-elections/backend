@@ -12,3 +12,6 @@ pyenv/
 
 # database
 *.sqlite3
+
+# swapfiles
+*.swp
