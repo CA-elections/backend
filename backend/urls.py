@@ -19,6 +19,7 @@ from django.conf.urls import url, include
 from django.views import generic
 
 urlpatterns = [
+    url(r'^$', generic.RedirectView.as_view(url='api/docs', permanent=False)),
     path('admin/', admin.site.urls),
     url(r'^api$', generic.RedirectView.as_view(url='api/', permanent=True)),
     url(r'^api/', include('api.urls')),
