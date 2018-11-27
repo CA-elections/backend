@@ -20,9 +20,11 @@ def send_emails_with_code(election=None):
                                                     election__date_start__lt=now,
                                                     election=election)
     for n in notifications:
-        codes = "";
+        codes = ""
+        if not len(n.votes):
+            continue
         for v in n.votes.all():
-            codes += n.code;
+            codes += n.code
         if n.election.is_student:
             msg = EmailMessage(settings.EMAIL_SUBJECT, settings.EMAIL_TEMPLATE.format(codes=codes),
                                to=[bakalari_reader.get_student_email(v.id_student)])
