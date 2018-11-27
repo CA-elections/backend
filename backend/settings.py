@@ -122,6 +122,7 @@ DEFAULT_FROM_EMAIL = 'noreply@gjk.cz'
 EMAIL_HOST_USER = 'cavolbymail@gmail.com'
 EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
+EMAIL_SUBJECT = "Elektronické volby do školské rady"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
