@@ -21,16 +21,14 @@ def send_emails_with_code(election=None):
                                                     election__date_start__lt=now,
                                                     election=election)
     for n in notifications:
-        codes = ""
         if not n.votes.count():
             continue
-        for v in n.votes.all():
-            codes += n.code
+        v = n.votes.first()
         if n.election.is_student:
-            msg = EmailMessage(settings.EMAIL_SUBJECT, settings.EMAIL_TEMPLATE.format(codes=codes),
+            msg = EmailMessage(settings.EMAIL_SUBJECT, settings.EMAIL_TEMPLATE.format(code=n.code),
                                to=[bakalari_reader.get_student_email(v.id_student)])
         else:
-            msg = EmailMessage(settings.EMAIL_SUBJECT, n.code, to=[bakalari_reader.get_parent_email(v.id_student)])
+            msg = EmailMessage(settings.EMAIL_SUBJECT, settings.EMAIL_TEMPLATE.format(code=n.code), to=[bakalari_reader.get_parent_email(v.id_student)])
         try:
             msg.send()
         except SMTPException:
