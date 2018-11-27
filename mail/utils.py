@@ -37,6 +37,7 @@ def send_emails_with_code(election=None):
             pass
         else:
             n.sent = True
+            print("dwdw")
             n.save()
 
 
