@@ -1,3 +1,4 @@
+from django.db.models import Sum, functions
 from rest_framework import serializers, validators
 from .models import Candidate, Election, Notification, Vote, Score
 
@@ -12,11 +13,27 @@ class CandidateReadSerializer(serializers.BaseSerializer):
 
     def to_representation(self, instance):
         return {
+            'id': instance.id,
             'is_student': instance.is_student,
             'name': instance.name,
             'surname': instance.surname,
             'annotation': instance.annotation,
-            'elections': [ElectionReadSerializer(score.election).data for score in Score.objects.filter(candidate=instance)],
+            'elections': [
+                {
+                    'id': election.id,
+                    'date_start': election.date_start,
+                    'date_end': election.date_end,
+                    'is_student': election.is_student,
+                    'name': election.name,
+                    'votes': Score.objects.filter(election=election).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+                    'candidates': [
+                        {
+                            'id': candidate.id,
+                            'votes': votes,
+                        } for candidate, votes in map(lambda x: (x.candidate, x.votes), Score.objects.filter(election=election))
+                    ]
+                } for election in map(lambda x: x.election, Score.objects.filter(candidate=instance))
+            ],
         }
 
     def to_internal_value(self, data):
@@ -73,10 +90,12 @@ class ElectionReadSerializer(serializers.BaseSerializer):
 
     def to_representation(self, instance):
         return {
+            'id': instance.id,
             'date_start': instance.date_start,
             'date_end': instance.date_end,
             'is_student': instance.is_student,
             'name': instance.name,
+            'votes': Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
             'candidates': [
                 {
                     'id': score.candidate.id,
