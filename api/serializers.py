@@ -215,3 +215,33 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
     def create(self, validated_data):
         raise NotImplementedError
 
+
+class ElectionGetResultsSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+        return {
+            'id': instance.id,
+            'date_start': instance.date_start,
+            'date_end': instance.date_end,
+            'is_student': instance.is_student,
+            'name': instance.name,
+            'candidates': [
+                {
+                    'id': score.candidate.id,
+                    'name': score.candidate.name,
+                    'surname': score.candidate.surname,
+                    'is_student': score.candidate.is_student,
+                    'annotation': score.candidate.annotation,
+                    'percents': score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+                } for score in Score.objects.filter(election=instance)],
+        }
+
+    def to_internal_value(self, data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
