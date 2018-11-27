@@ -6,8 +6,10 @@ from .utils import send_emails_with_code
 from django.conf import settings
 import datetime
 import bakalari_reader
+from django.test.utils import override_settings
 
 
+@override_settings(EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend")
 class EmailTestCase(TestCase):
     def setUp(self):
         self.student1 = 1
