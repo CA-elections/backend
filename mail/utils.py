@@ -10,18 +10,18 @@ def send_emails_with_code(election=None):
     if election is not None:
         notifications = Notification.objects.filter(sent=False,
                                                     election__date_end__gt=now,
-                                                    election__date_start_lt=now)
+                                                    election__date_start__lt=now)
     else:
         notifications = Notification.objects.filter(sent=False,
                                                     election__date_end__gt=now,
-                                                    election__date_start_lt=now,
+                                                    election__date_start__lt=now,
                                                     election=election)
     for n in notifications:
-        for v in n.votes:
+        for v in n.votes.all():
             if n.election.is_student:
-                msg = EmailMessage(settings.EMAIL_SUBJECT, n.code, to=bakalari_reader.get_student_email(v.student_id))
+                msg = EmailMessage(settings.EMAIL_SUBJECT, n.code, to=[bakalari_reader.get_student_email(v.id_student)])
             else:
-                msg = EmailMessage(settings.EMAIL_SUBJECT, n.code, to=bakalari_reader.get_parent_email(v.student_id))
+                msg = EmailMessage(settings.EMAIL_SUBJECT, n.code, to=[bakalari_reader.get_parent_email(v.id_student)])
             msg.send()
             n.sent = True
             n.save()
