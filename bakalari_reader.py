@@ -8,7 +8,8 @@ def get_parent_email(student_id):
 
 
 def get_birthdate(student_id):
-    return datetime.date(*map(int, conn.cursor().execute("SELECT Birthdate FROM bakalari WHERE ID=(?);", [str(student_id)]).fetchone()[0].split(".")))
+    day, month, year = map(int, conn.cursor().execute("SELECT Birthdate FROM bakalari WHERE ID=(?);", [str(student_id)]).fetchone()[0].split("."))
+    return datetime.date(year, month, day)
 
 
 def get_students_with_parent_email(parent_email):
