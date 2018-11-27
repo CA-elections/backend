@@ -196,7 +196,7 @@ class ScoreSerializer(serializers.ModelSerializer):
         fields = ('id', 'candidate', 'election', 'votes')
         read_only_fields = ('id',)
 
-
+        
 class ElectionGetAllSerializer(serializers.BaseSerializer):
 
     def to_representation(self, instance):
@@ -248,4 +248,3 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
 
     def create(self, validated_data):
         raise NotImplementedError
-
