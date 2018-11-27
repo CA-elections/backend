@@ -87,4 +87,3 @@ class ElectionGetResults(generics.RetrieveAPIView):
 
     queryset = Election.objects.all()
     serializer_class = ElectionGetResultsSerializer
-

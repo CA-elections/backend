@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^$', get_schema_view(title="API for Ca elections")),
     url(r'^docs/', include_docs_urls(title="CA elections API")),
     url(r'^auth/', include('rest_framework.urls')),
-
+  
     url(r'^get_elections/$', ElectionGetAll.as_view()),
     url(r'^election/(?P<pk>[0-9]+)/$', ElectionGetResults.as_view()),
 
