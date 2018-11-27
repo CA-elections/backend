@@ -5,11 +5,18 @@ import datetime
 import bakalari_reader
 
 
-def send_emails():
+def send_emails(election=None):
     now = datetime.datetime.now()
-    for n in Notification.objects.filter(sent=False,
-                                         election__date_end__gt=now,
-                                         election__date_start_lt=now):
+    if election is not None:
+        notifications = Notification.objects.filter(sent=False,
+                                                    election__date_end__gt=now,
+                                                    election__date_start_lt=now)
+    else:
+        notifications = Notification.objects.filter(sent=False,
+                                                    election__date_end__gt=now,
+                                                    election__date_start_lt=now,
+                                                    election=election)
+    for n in notifications:
         for v in n.votes:
             if n.election.is_student:
                 msg = EmailMessage(settings.EMAIL_SUBJECT, n.code, to=bakalari_reader.get_student_email(v.student_id))
