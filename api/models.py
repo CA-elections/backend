@@ -4,7 +4,7 @@ from django.db import models
 class Candidate(models.Model):
     name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
-    annotation = models.CharField(max_length=3000)
+    annotation = models.CharField(max_length=3000, default="")
     is_student = models.BooleanField()
 
 
@@ -18,9 +18,9 @@ class Election(models.Model):
 class Notification(models.Model):
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='notifiactions')
 
-    sent = models.BooleanField()
+    sent = models.BooleanField(default=False)
     code = models.CharField(max_length=100)
-    used = models.BooleanField()
+    used = models.BooleanField(default=False)
 
 
 class Vote(models.Model):
@@ -30,7 +30,7 @@ class Vote(models.Model):
 
 
 class Score(models.Model):
-    candidate = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name='scores')
-    election = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name='vote_counts')
+    candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='elections')
+    election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='candidates')
 
-    votes = models.IntegerField()
+    votes = models.IntegerField(default=0)

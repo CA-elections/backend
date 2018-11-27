@@ -8,7 +8,7 @@ pyenv/
 *.pyc
 
 # django
-api/migrations/
+*/migrations/
 
 # database
 *.sqlite3
