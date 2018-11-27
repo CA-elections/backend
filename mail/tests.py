@@ -1,3 +1,4 @@
+# noinspection PyPackageRequirements
 from django.test import TestCase
 from api.models import Election, Notification, Vote
 from .utils import send_emails
