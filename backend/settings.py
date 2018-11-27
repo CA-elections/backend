@@ -107,7 +107,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Prague'
 
 USE_I18N = True
 
@@ -123,6 +123,7 @@ EMAIL_HOST_USER = 'cavolbymail@gmail.com'
 EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT = "Elektronické volby do školské rady"
+EMAIL_TEMPLATE = "Elektronické volby do školské rady, \n hlasujte: \n {code} \n"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
