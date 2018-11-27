@@ -1,10 +1,7 @@
 from django.core.mail import EmailMessage
 from api.models import Notification
 import datetime
-
-
-def get_parent_email(student_id):
-    pass
+import bakalari_reader
 
 
 def send_emails():
@@ -13,6 +10,6 @@ def send_emails():
                                          election__date_end__gt=now,
                                          election__date_start_lt=now):
         for v in n.votes:
-            EmailMessage("Studentské volby", n.code, to=get_parent_email(v.student_id)).send()
+            EmailMessage("Studentské volby", n.code, to=bakalari_reader.get_parent_email(v.student_id)).send()
             n.sent = True
             n.save()
