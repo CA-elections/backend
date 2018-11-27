@@ -1,0 +1,17 @@
+# python environment
+pyenv/
+
+# JetBrains files
+.idea/
+
+# python
+*.pyc
+
+# django
+*/migrations/
+
+# database
+*.sqlite3
+
+# swapfiles
+*.swp

@@ -1,0 +1,14 @@
+[
+  {
+    "annotation" : "This is a test annotation",
+    "name" : "Test",
+    "surname" : "Man",
+    "is_student" : false
+  },
+  {
+    "annotation" : "This is an another annotation",
+    "name" : "Testificate",
+    "surname" : "Subject",
+    "is_student" : true
+  }
+]
