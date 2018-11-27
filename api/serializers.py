@@ -1,6 +1,8 @@
 from django.db.models import Sum, functions
 from rest_framework import serializers, validators
 from .models import Candidate, Election, Notification, Vote, Score
+import datetime
+import pytz
 
 
 class CandidateWriteSerializer(serializers.ModelSerializer):
@@ -196,7 +198,7 @@ class ScoreSerializer(serializers.ModelSerializer):
         fields = ('id', 'candidate', 'election', 'votes')
         read_only_fields = ('id',)
 
-        
+
 class ElectionGetAllSerializer(serializers.BaseSerializer):
 
     def to_representation(self, instance):
@@ -252,6 +254,9 @@ class AdminElectionSerializer(serializers.BaseSerializer):
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
 
     def to_representation(self, instance):
+        if instance.date_end > datetime.datetime.now().astimezone(pytz.timezone('Europe/Prague')):
+            raise serializers.ValidationError('This Election is still in progress.')
+
         return {
             'id': instance.id,
             'date_start': instance.date_start,
