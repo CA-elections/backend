@@ -31,17 +31,17 @@ class EmailTestCase(TestCase):
     def test_send_student_election(self):
         self.assertFalse(self.n1.sent)
         send_emails_with_code(self.e1)
+        self.n1.refresh_from_db()
         self.assertTrue(self.n1.sent)
         self.assertEqual(django.core.mail.outbox[-1].subject, settings.EMAIL_SUBJECT)
-        self.assertEqual(django.core.mail.outbox[-1].body, self.n1.code)
         self.assertEqual(django.core.mail.outbox[-1].from_email, settings.DEFAULT_FROM_EMAIL)
         self.assertEqual(django.core.mail.outbox[-1].to[0], bakalari_reader.get_student_email(self.student1))
 
     def test_send_parent_election(self):
         self.assertFalse(self.n2.sent)
         send_emails_with_code(self.e2)
+        self.n2.refresh_from_db()
         self.assertTrue(self.n2.sent)
         self.assertEqual(django.core.mail.outbox[-1].subject, settings.EMAIL_SUBJECT)
-        self.assertEqual(django.core.mail.outbox[-1].body, self.n2.code)
         self.assertEqual(django.core.mail.outbox[-1].from_email, settings.DEFAULT_FROM_EMAIL)
         self.assertEqual(django.core.mail.outbox[-1].to[0], bakalari_reader.get_parent_email(self.student2))
