@@ -154,8 +154,8 @@ class NotificationWriteSerializer(serializers.ModelSerializer):
         return instance
 
     class Meta:
-        model = Election
-        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates')
+        model = Notification
+        fields = ('id', 'election', 'sent', 'code', 'used', 'students')
 
 
 class NotificationReadSerializer(serializers.BaseSerializer):
