@@ -7,7 +7,7 @@ import bakalari_reader
 
 def send_emails_with_code(election=None):
     now = datetime.datetime.now()
-    if election is not None:
+    if election is None:
         notifications = Notification.objects.filter(sent=False,
                                                     election__date_end__gt=now,
                                                     election__date_start__lt=now)
