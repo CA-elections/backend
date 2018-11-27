@@ -2,6 +2,8 @@
 import os
 import sys
 
+from api/models import Candidate, Election
+
 if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
     try:
@@ -14,3 +16,5 @@ if __name__ == '__main__':
         ) from exc
     execute_from_command_line(sys.argv)
 
+def genelections():
+    new_entry = Election:
