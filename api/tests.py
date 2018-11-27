@@ -35,7 +35,6 @@ class CandidateTests(APITestCase):
         for instance_data in self.mock_up_data:
             instance = Candidate(id=1, **instance_data)
             response = self.client.get(self.url + str(instance.id) + "/", {}, format="json")
-            print(response.body)
             # Check status code
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # Check the response data
