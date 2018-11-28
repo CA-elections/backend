@@ -1,8 +1,13 @@
 from rest_framework import generics, permissions, views, response, exceptions, status, pagination, viewsets
 
-from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, ScoreSerializer, ElectionGetAllSerializer, AdminElectionSerializer, ElectionGetResultsSerializer, NotificationInfoSerializer
+from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, \
+    ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, \
+    ScoreSerializer, ElectionGetAllSerializer, AdminElectionReadSerializer, AdminElectionWriteSerializer, \
+    ElectionGetResultsSerializer, NotificationInfoSerializer, NotificationVoteSerializer
 
 from .models import Candidate, Election, Notification, Vote, Score
+
+from rest_framework.permissions import IsAdminUser
 
 
 def get_serializer_getter(WriteSerializer, ReadSerializer):
@@ -94,7 +99,7 @@ class ElectionGetAll(generics.ListAPIView):
     serializer_class = ElectionGetAllSerializer
 
 
-class AdminElectionDetails(generics.RetrieveAPIView):
+class AdminElectionDetails(generics.RetrieveUpdateDestroyAPIView):
     """
     Build details about an election for admin in the format:\n
         {
@@ -114,8 +119,12 @@ class AdminElectionDetails(generics.RetrieveAPIView):
             }, ...]
         }
     """
+
+    permission_classes = (IsAdminUser,)
+
     queryset = Election.objects.all()
-    serializer_class = AdminElectionSerializer
+    get_serializer_class = get_serializer_getter(AdminElectionWriteSerializer, AdminElectionReadSerializer)
+    #serializer_class = AdminElectionSerializer
 
 
 class ElectionGetResults(generics.RetrieveAPIView):
@@ -137,15 +146,38 @@ class ElectionGetResults(generics.RetrieveAPIView):
                     "annotation": Description of the candidate
                     "votes": How many votes has the candidate
                 }
-        ]
+            ]
         }
     """
+    permission_classes = (IsAdminUser,)
+
     queryset = Election.objects.all()
     serializer_class = ElectionGetResultsSerializer
 
 
 class NotificationInfo(generics.RetrieveAPIView):
-
+    """
+        Returns how many votes does a notification have and general info about candidates in the relevant election\n
+            {
+                "votes_available": Number of votes available for the notification
+                "candidates": [ Array of candidates with their info
+                    {
+                        "id": ID of the candidate,
+                        "name": Name of the candidate,
+                        "surname": Surname of the candidate,
+                        "is_student": If is candidate student,
+                        "annotation": Description of the candidate
+                    }
+                ]
+            }
+        """
     queryset = Notification.objects.all()
     serializer_class = NotificationInfoSerializer
+    lookup_field = "code"
+
+
+class NotificationVote(generics.UpdateAPIView):
+
+    queryset = Notification.objects.all()
+    serializer_class = NotificationVoteSerializer
     lookup_field = "code"

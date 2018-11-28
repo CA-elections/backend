@@ -252,7 +252,7 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
         raise NotImplementedError
 
 
-class AdminElectionSerializer(serializers.BaseSerializer):
+class AdminElectionReadSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return {
                 'id': instance.id,
@@ -275,11 +275,52 @@ class AdminElectionSerializer(serializers.BaseSerializer):
     def to_internal_value(self, data):
         raise NotImplementedError
 
+    def create(self, validated_data):
+        raise NotImplementedError
+
     def update(self, instance, validated_data):
         raise NotImplementedError
 
+
+class AdminElectionWriteSerializer(serializers.ModelSerializer):
+    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
+
     def create(self, validated_data):
-        raise NotImplementedError
+        candidates_data = validated_data.pop('candidates')
+        election = Election.objects.create(**validated_data)
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=election,
+            )
+        return election
+
+    def update(self, instance, validated_data):
+        candidates_data = validated_data.pop('candidates')
+        for score in Score.objects.filter(election=instance):
+            if score.candidate.id not in candidates_data:
+                score.candidate.delete()
+
+            candidates_data = list(filter(lambda x: x != score.candidate.id, candidates_data))
+
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=instance,
+            )
+
+        instance.date_start = validated_data.get('date_start', instance.date_start)
+        instance.date_end = validated_data.get('date_end', instance.date_end)
+        instance.is_student = validated_data.get('is_student', instance.is_student)
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+
+        return instance
+
+    class Meta:
+        model = Election
+        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates', 'description')
 
 
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
@@ -324,6 +365,7 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
             'votes_available': len(Vote.objects.filter(notification=instance)),
             'candidates': [
                 {
+                    'id': score.candidate.id,
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
@@ -343,3 +385,37 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
     def create(self, validated_data):
 
         raise NotImplementedError
+
+
+class NotificationVoteSerializer(serializers.ModelSerializer):
+    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
+
+    def update(self, instance, validated_data):
+
+        candidates = validated_data['candidates']
+
+        votes_available = len(Vote.objects.filter(notification=instance))
+        votes_used = len(candidates)
+
+        # Assert user hasn't sent too many votes
+        if votes_used > votes_available:
+            raise serializers.ValidationError('Too many votes were sent. This link only has %d.' % votes_available)
+
+        # Set notification as used
+        instance.used = True
+        instance.save()
+
+        # Update candidate scores
+        for candidate in candidates:
+            try:
+                score = Score.objects.filter(election=instance.election, candidate=candidate)[0]
+            except IndexError:
+                raise serializers.ValidationError('One of the selected candidates (id = %d) isn\'t in the relevant election' % candidate.id)
+            score.votes += 1
+            score.save()
+
+        return instance
+
+    class Meta:
+        model = Notification
+        fields = ('candidates',)
