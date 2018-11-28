@@ -124,7 +124,7 @@ class ElectionReadSerializer(serializers.BaseSerializer):
 
 
 class NotificationWriteSerializer(serializers.ModelSerializer):
-    students = serializers.IntegerField(min_value=1)
+    students = serializers.ListField(child=serializers.IntegerField(min_value=1))
 
     def create(self, validated_data):
         students_data = validated_data.pop('students')
@@ -173,7 +173,7 @@ class NotificationReadSerializer(serializers.BaseSerializer):
             'used': instance.used,
             'students': [
                 {
-                    'id': vote.id_students,
+                    'id': vote.id_student,
                 } for vote in Vote.objects.filter(notification=instance)],
         }
 
@@ -220,8 +220,8 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
             if totalvotes == 0:
                 return data
             samevotes = 1
-            while (samevotes < scores.count()):
-                if (scores[samevotes - 1].votes == scores[samevotes].votes):
+            while samevotes < scores.count():
+                if scores[samevotes - 1].votes == scores[samevotes].votes:
                     samevotes += 1
                 else:
                     break
@@ -231,8 +231,6 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
                 data['winner_name'] = scores[0].candidate.name
                 data['winner_surname'] = scores[0].candidate.surname
         return data
-
-            
 
     def to_internal_value(self, data):
         raise NotImplementedError
@@ -317,4 +315,33 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
         raise NotImplementedError
 
     def create(self, validated_data):
+        raise NotImplementedError
+
+
+class NotificationInfoSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+
+        return {
+            'votes_available': len(Vote.objects.filter(notification=instance)),
+            'candidates': [
+                {
+                    'name': score.candidate.name,
+                    'surname': score.candidate.surname,
+                    'is_student': score.candidate.is_student,
+                    'annotation': score.annotation,
+                } for score in Score.objects.filter(election=instance.election)
+            ]
+        }
+
+    def to_internal_value(self, data):
+
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+
+        raise NotImplementedError
+
+    def create(self, validated_data):
+
         raise NotImplementedError
