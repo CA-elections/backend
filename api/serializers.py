@@ -236,7 +236,7 @@ class AdminElectionSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'anotation': score.candidate.anotation,
+                    'annotation': score.candidate.anotation,
                     'votes': score.votes,
                 } for score in Score.objects.filter(election=instance).order_by('-votes')],
         }
