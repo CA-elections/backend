@@ -2,7 +2,8 @@ from rest_framework import generics, permissions, views, response, exceptions, s
 
 from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, \
     ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, \
-    ScoreSerializer, ElectionGetAllSerializer, AdminElectionReadSerializer, AdminElectionWriteSerializer, ElectionGetResultsSerializer
+    ScoreSerializer, ElectionGetAllSerializer, AdminElectionReadSerializer, AdminElectionWriteSerializer, \
+    ElectionGetResultsSerializer, NotificationInfoSerializer
 
 
 from .models import Candidate, Election, Notification, Vote, Score
@@ -149,6 +150,8 @@ class ElectionGetResults(generics.RetrieveAPIView):
         ]
         }
     """
+    permission_classes = (IsAdminUser,)
+
     queryset = Election.objects.all()
     serializer_class = ElectionGetResultsSerializer
 
