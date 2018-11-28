@@ -10,8 +10,9 @@ tz = timezone(settings.TIME_ZONE)
 
 def generate_notifications():
     now = datetime.datetime.now(tz)
-    for election in Election.objects.filter(are_notifs_generated=False, date_start__gte=now):
+    for election in Election.objects.filter(are_notifs_generated=False, date_start__lte=now):
         log("generating notifications (and votes) for an election (name: " + election.name + ")")
+        log("election started at " + str(election.date_start))
         if not election.is_student:
             notifs = bakalari_reader.get_all_youth_by_parent()
             for notif in notifs:
