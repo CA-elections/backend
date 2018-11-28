@@ -4,7 +4,6 @@ from .serializers import CandidateWriteSerializer, CandidateReadSerializer, Elec
 
 from .models import Candidate, Election, Notification, Vote, Score
 
-from rest_framework.documentation import include_docs_urls
 
 def get_serializer_getter(WriteSerializer, ReadSerializer):
 
