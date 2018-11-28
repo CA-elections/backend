@@ -4,7 +4,7 @@ from rest_framework.schemas import get_schema_view
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.authtoken import views
 
-from .views import ElectionGetAll, CandidateList, CandidateDetails, ElectionList, ElectionDetails, NotificationList, NotificationDetails, VoteList, VoteDetails, ScoreList, ScoreDetails, AdminElectionDetails, ElectionGetResults, NotificationInfo
+from .views import ElectionGetAll, CandidateList, CandidateDetails, ElectionList, ElectionDetails, NotificationList, NotificationDetails, VoteList, VoteDetails, ScoreList, ScoreDetails, AdminElectionDetails, ElectionGetResults, NotificationInfo, NotificationVote
 
 urlpatterns = [
     url(r'^$', get_schema_view(title="API for Ca elections")),
@@ -15,6 +15,7 @@ urlpatterns = [
     url(r'^election/(?P<pk>[0-9]+)/$', ElectionGetResults.as_view()),
 
     url(r'^notification/(?P<code>.+)/$', NotificationInfo.as_view()),
+    url(r'^vote/(?P<code>.+)/$', NotificationVote.as_view()),
 
     url(r'^test/candidate/$', CandidateList.as_view()),
     url(r'^test/candidate/(?P<pk>[0-9]+)/$', CandidateDetails.as_view()),

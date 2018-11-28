@@ -336,3 +336,14 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
     def create(self, validated_data):
 
         raise NotImplementedError
+
+
+class NotificationVoteSerializer(serializers.ModelSerializer):
+    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
+
+    def update(self, instance, validated_data):
+        pass
+
+    class Meta:
+        model = Notification
+        fields = ('candidates',)
