@@ -14,6 +14,7 @@ class Election(models.Model):
     is_student = models.BooleanField()
     name = models.CharField(max_length=200)
     description = models.TextField(default="")
+    are_notifs_generated = models.BooleanField()
 
 
 class Notification(models.Model):
