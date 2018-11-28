@@ -3,9 +3,11 @@ from rest_framework import serializers, validators
 from .models import Candidate, Election, Notification, Vote, Score
 import datetime
 import pytz
+import sys
 
 import datetime
 import pytz
+
 
 class CandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,18 +65,24 @@ class ElectionWriteSerializer(serializers.ModelSerializer):
         return election
 
     def update(self, instance, validated_data):
-        candidates_data = validated_data.pop('candidates')
-        for score in Score.objects.filter(election=instance):
-            if score.candidate.id not in candidates_data:
-                score.candidate.delete()
+        try:
+            candidates_data = list(map(lambda x: x, validated_data.pop('candidates'))),
+            print(candidates_data)
+            sys.stderr.write(str(candidates_data) + "\n")
+            for score in Score.objects.filter(election=instance):
+                if score.candidate not in candidates_data:
+                    score.delete()
 
-            candidates_data = list(filter(lambda x: x != score.candidate.id, candidates_data))
+                candidates_data = list(filter(lambda x: x != score.candidate, candidates_data))
 
-        for candidate in candidates_data:
-            Score.objects.create(
-                candidate=candidate,
-                election=instance,
-            )
+            for candidate in candidates_data:
+                Score.objects.create(
+                    candidate=candidate,
+                    election=instance,
+                )
+        except KeyError:
+            pass
+
 
         instance.date_start = validated_data.get('date_start', instance.date_start)
         instance.date_end = validated_data.get('date_end', instance.date_end)
@@ -123,7 +131,7 @@ class ElectionReadSerializer(serializers.BaseSerializer):
 
 
 class NotificationWriteSerializer(serializers.ModelSerializer):
-    students = serializers.IntegerField(min_value=1)
+    students = serializers.ListField(child=serializers.IntegerField(min_value=1))
 
     def create(self, validated_data):
         students_data = validated_data.pop('students')
@@ -136,18 +144,21 @@ class NotificationWriteSerializer(serializers.ModelSerializer):
         return notification
 
     def update(self, instance, validated_data):
-        students_data = validated_data.pop('students')
-        for vote in Vote.objects.filter(notification=instance):
-            if vote.id_student not in students_data:
-                vote.delete()
+        try:
+            students_data = validated_data.pop('students')
+            for vote in Vote.objects.filter(notification=instance):
+                if vote.id_student not in students_data:
+                    vote.delete()
 
-            students_data = list(filter(lambda x: x != vote.id_student, students_data))
+                students_data = list(filter(lambda x: x != vote.id_student, students_data))
 
-        for student_id in students_data:
-            Vote.objects.create(
-                notification=instance,
-                id_student=student_id,
-            )
+            for student_id in students_data:
+                Vote.objects.create(
+                    notification=instance,
+                    id_student=student_id,
+                )
+        except KeyError:
+            pass
 
         instance.election = validated_data.get('election', instance.election)
         instance.sent = validated_data.get('sent', instance.sent)
@@ -172,7 +183,7 @@ class NotificationReadSerializer(serializers.BaseSerializer):
             'used': instance.used,
             'students': [
                 {
-                    'id': vote.id_students,
+                    'id': vote.id_student,
                 } for vote in Vote.objects.filter(notification=instance)],
         }
 
@@ -201,7 +212,6 @@ class ScoreSerializer(serializers.ModelSerializer):
 
 
 class ElectionGetAllSerializer(serializers.BaseSerializer):
-
     def to_representation(self, instance):
         data = {
             'id': instance.id,
@@ -220,8 +230,8 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
             if totalvotes == 0:
                 return data
             samevotes = 1
-            while (samevotes < scores.count()):
-                if (scores[samevotes - 1].votes == scores[samevotes].votes):
+            while samevotes < scores.count():
+                if scores[samevotes - 1].votes == scores[samevotes].votes:
                     samevotes += 1
                 else:
                     break
@@ -232,8 +242,6 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
                 data['winner_surname'] = scores[0].candidate.surname
         return data
 
-            
-
     def to_internal_value(self, data):
         raise NotImplementedError
 
@@ -243,8 +251,8 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
     def create(self, validated_data):
         raise NotImplementedError
 
-class AdminElectionSerializer(serializers.BaseSerializer):
 
+class AdminElectionReadSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return {
                 'id': instance.id,
@@ -267,15 +275,55 @@ class AdminElectionSerializer(serializers.BaseSerializer):
     def to_internal_value(self, data):
         raise NotImplementedError
 
-    def update(self, instance, validated_data):
-        raise NotImplementedError
-
     def create(self, validated_data):
         raise NotImplementedError
 
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+
+class AdminElectionWriteSerializer(serializers.ModelSerializer):
+    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
+
+    def create(self, validated_data):
+        candidates_data = validated_data.pop('candidates')
+        election = Election.objects.create(**validated_data)
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=election,
+            )
+        return election
+
+    def update(self, instance, validated_data):
+        candidates_data = validated_data.pop('candidates')
+        for score in Score.objects.filter(election=instance):
+            if score.candidate.id not in candidates_data:
+                score.candidate.delete()
+
+            candidates_data = list(filter(lambda x: x != score.candidate.id, candidates_data))
+
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=instance,
+            )
+
+        instance.date_start = validated_data.get('date_start', instance.date_start)
+        instance.date_end = validated_data.get('date_end', instance.date_end)
+        instance.is_student = validated_data.get('is_student', instance.is_student)
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+
+        return instance
+
+    class Meta:
+        model = Election
+        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates', 'description')
+
 
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
-
     def to_representation(self, instance):
         if instance.date_end > datetime.datetime.now().astimezone(pytz.timezone('Europe/Prague')):
             raise serializers.ValidationError('This Election is still in progress.')
@@ -293,8 +341,9 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.annotation,
-                    'percentage': 0 if not Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+                    'annotation': score.candidate.annotation,
+                    'percentage': 0 if not Score.objects.filter(election=instance)\
+.aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
                 } for score in Score.objects.filter(election=instance)],
         }
 
@@ -306,3 +355,67 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
 
     def create(self, validated_data):
         raise NotImplementedError
+
+
+class NotificationInfoSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+
+        return {
+            'votes_available': len(Vote.objects.filter(notification=instance)),
+            'candidates': [
+                {
+                    'id': score.candidate.id,
+                    'name': score.candidate.name,
+                    'surname': score.candidate.surname,
+                    'is_student': score.candidate.is_student,
+                    'annotation': score.annotation,
+                } for score in Score.objects.filter(election=instance.election)
+            ]
+        }
+
+    def to_internal_value(self, data):
+
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+
+        raise NotImplementedError
+
+    def create(self, validated_data):
+
+        raise NotImplementedError
+
+
+class NotificationVoteSerializer(serializers.ModelSerializer):
+    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
+
+    def update(self, instance, validated_data):
+
+        candidates = validated_data['candidates']
+
+        votes_available = len(Vote.objects.filter(notification=instance))
+        votes_used = len(candidates)
+
+        # Assert user hasn't sent too many votes
+        if votes_used > votes_available:
+            raise serializers.ValidationError('Too many votes were sent. This link only has %d.' % votes_available)
+
+        # Set notification as used
+        instance.used = True
+        instance.save()
+
+        # Update candidate scores
+        for candidate in candidates:
+            try:
+                score = Score.objects.filter(election=instance.election, candidate=candidate)[0]
+            except IndexError:
+                raise serializers.ValidationError('One of the selected candidates (id = %d) isn\'t in the relevant election' % candidate.id)
+            score.votes += 1
+            score.save()
+
+        return instance
+
+    class Meta:
+        model = Notification
+        fields = ('candidates',)

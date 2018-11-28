@@ -1,4 +1,9 @@
+from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+import uuid
 
 
 class Candidate(models.Model):
@@ -20,7 +25,7 @@ class Notification(models.Model):
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='notifications')
 
     sent = models.BooleanField(default=False)
-    code = models.CharField(max_length=100)
+    code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     used = models.BooleanField(default=False)
 
 
@@ -36,3 +41,9 @@ class Score(models.Model):
 
     votes = models.IntegerField(default=0)
     annotation = models.TextField(default="")
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)

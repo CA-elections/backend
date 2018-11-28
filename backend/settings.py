@@ -27,6 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
 
 # Application definition
 
@@ -38,12 +44,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
     'api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -124,8 +133,15 @@ EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT = "Elektronické volby do školské rady"
 EMAIL_TEMPLATE = "Elektronické volby do školské rady, \n hlasujte: \n {code} \n"
+EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb do školní rady"
+EMAIL_RESULTS_TEMPLATE = "Bois, \n Diz resultz r rdy! \n click link free download now torrent, m8 : https://lamiFarma.kupteLamu/Lamič \n Boiz"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# TODO Set this to False!!!
+
+CORS_ORIGIN_ALLOW_ALL = True
