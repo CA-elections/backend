@@ -245,7 +245,7 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
         raise NotImplementedError
 
 
-class AdminElectionSerializer(serializers.BaseSerializer):
+class AdminElectionReadSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return {
                 'id': instance.id,
@@ -268,11 +268,52 @@ class AdminElectionSerializer(serializers.BaseSerializer):
     def to_internal_value(self, data):
         raise NotImplementedError
 
+    def create(self, validated_data):
+        raise NotImplementedError
+
     def update(self, instance, validated_data):
         raise NotImplementedError
 
+
+class AdminElectionWriteSerializer(serializers.ModelSerializer):
+    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
+
     def create(self, validated_data):
-        raise NotImplementedError
+        candidates_data = validated_data.pop('candidates')
+        election = Election.objects.create(**validated_data)
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=election,
+            )
+        return election
+
+    def update(self, instance, validated_data):
+        candidates_data = validated_data.pop('candidates')
+        for score in Score.objects.filter(election=instance):
+            if score.candidate.id not in candidates_data:
+                score.candidate.delete()
+
+            candidates_data = list(filter(lambda x: x != score.candidate.id, candidates_data))
+
+        for candidate in candidates_data:
+            Score.objects.create(
+                candidate=candidate,
+                election=instance,
+            )
+
+        instance.date_start = validated_data.get('date_start', instance.date_start)
+        instance.date_end = validated_data.get('date_end', instance.date_end)
+        instance.is_student = validated_data.get('is_student', instance.is_student)
+        instance.name = validated_data.get('name', instance.name)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+
+        return instance
+
+    class Meta:
+        model = Election
+        fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates', 'description')
 
 
 class ElectionGetResultsSerializer(serializers.BaseSerializer):

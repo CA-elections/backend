@@ -1,8 +1,13 @@
 from rest_framework import generics, permissions, views, response, exceptions, status, pagination, viewsets
 
-from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, ScoreSerializer, ElectionGetAllSerializer, AdminElectionSerializer, ElectionGetResultsSerializer, NotificationInfoSerializer, NotificationVoteSerializer
+from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, \
+    ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, \
+    ScoreSerializer, ElectionGetAllSerializer, AdminElectionReadSerializer, AdminElectionWriteSerializer, \
+    ElectionGetResultsSerializer, NotificationInfoSerializer, NotificationVoteSerializer
 
 from .models import Candidate, Election, Notification, Vote, Score
+
+from rest_framework.permissions import IsAdminUser
 
 
 def get_serializer_getter(WriteSerializer, ReadSerializer):
@@ -94,7 +99,7 @@ class ElectionGetAll(generics.ListAPIView):
     serializer_class = ElectionGetAllSerializer
 
 
-class AdminElectionDetails(generics.RetrieveAPIView):
+class AdminElectionDetails(generics.RetrieveUpdateDestroyAPIView):
     """
     Build details about an election for admin in the format:\n
         {
@@ -114,8 +119,12 @@ class AdminElectionDetails(generics.RetrieveAPIView):
             }, ...]
         }
     """
+
+    permission_classes = (IsAdminUser,)
+
     queryset = Election.objects.all()
-    serializer_class = AdminElectionSerializer
+    get_serializer_class = get_serializer_getter(AdminElectionWriteSerializer, AdminElectionReadSerializer)
+    #serializer_class = AdminElectionSerializer
 
 
 class ElectionGetResults(generics.RetrieveAPIView):
@@ -140,6 +149,8 @@ class ElectionGetResults(generics.RetrieveAPIView):
             ]
         }
     """
+    permission_classes = (IsAdminUser,)
+
     queryset = Election.objects.all()
     serializer_class = ElectionGetResultsSerializer
 
