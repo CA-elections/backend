@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+import uuid
 
 
 class Candidate(models.Model):
@@ -24,7 +25,7 @@ class Notification(models.Model):
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='notifications')
 
     sent = models.BooleanField(default=False)
-    code = models.CharField(max_length=100)
+    code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     used = models.BooleanField(default=False)
 
 
