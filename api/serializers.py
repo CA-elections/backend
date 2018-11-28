@@ -202,16 +202,6 @@ class ScoreSerializer(serializers.ModelSerializer):
 
 
 class ElectionGetAllSerializer(serializers.BaseSerializer):
-    """Build a list of elections in the format:
-       {
-         "id": id,
-         "date_start": date_start,
-         "date_end": date_end,
-         "is_student": is_student,
-         "description": description,
-         "name": name
-       }
-    """
     def to_representation(self, instance):
         data = {
             'id': instance.id,
@@ -253,8 +243,8 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
     def create(self, validated_data):
         raise NotImplementedError
 
-class AdminElectionSerializer(serializers.BaseSerializer):
 
+class AdminElectionSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         return {
                 'id': instance.id,
@@ -302,8 +292,9 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.annotation,
-                    'percentage': 0 if not Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+                    'annotation': score.candidate.annotation,
+                    'percentage': 0 if not Score.objects.filter(election=instance)\
+.aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
                 } for score in Score.objects.filter(election=instance)],
         }
 
