@@ -4,6 +4,7 @@ from .serializers import CandidateWriteSerializer, CandidateReadSerializer, Elec
 
 from .models import Candidate, Election, Notification, Vote, Score
 
+from rest_framework.documentation import include_docs_urls
 
 def get_serializer_getter(WriteSerializer, ReadSerializer):
 
@@ -92,6 +93,26 @@ class AdminElectionDetails(generics.RetrieveAPIView):
 
 
 class ElectionGetResults(generics.RetrieveAPIView):
-
+    """
+    Returns information about one election identified by it's ID in this format:\n
+        {
+            "id": ID of the election,
+            "date_start": When has the election started,
+            "date_end": When will the election end,
+            "is_student": If is the election student,
+            "name": The name of the election,
+            "description": The description of the election,
+            "candidates": [ Array of candidates with their info
+                {
+                    "id": ID of the candidate,
+                    "name": Name of the candidate,
+                    "surname": Surname of the candidate,
+                    "is_student": If is candidate student,
+                    "annotation": Description of the candidate
+                    "votes": How many votes has the candidate
+                }
+            ]
+        }
+    """
     queryset = Election.objects.all()
     serializer_class = ElectionGetResultsSerializer

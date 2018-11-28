@@ -285,18 +285,6 @@ class AdminElectionSerializer(serializers.BaseSerializer):
 
 
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
-    """This function will return information about one election identified by it's ID
-        in this format:
-        {
-        "id": <ID of the election>,
-        "date_start": <When has the election started>,
-        "date_end": <When will the election end>,
-        "is_student": <If is the election student>,
-        "name": <The name of the election>,
-        "description": <The description of the election>,
-        "candidates": <Array of candidates with info>
-        }
-    """
     def to_representation(self, instance):
         if instance.date_end > datetime.datetime.now().astimezone(pytz.timezone('Europe/Prague')):
             raise serializers.ValidationError('This Election is still in progress.')
