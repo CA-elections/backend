@@ -3,6 +3,7 @@ from rest_framework import serializers, validators
 from .models import Candidate, Election, Notification, Vote, Score
 import datetime
 import pytz
+import sys
 
 import datetime
 import pytz
@@ -64,12 +65,14 @@ class ElectionWriteSerializer(serializers.ModelSerializer):
         return election
 
     def update(self, instance, validated_data):
-        candidates_data = validated_data.pop('candidates')
+        candidates_data = list(map(lambda x: x, validated_data.pop('candidates'))),
+        print(candidates_data)
+        sys.stderr.write(str(candidates_data) + "\n")
         for score in Score.objects.filter(election=instance):
-            if score.candidate.id not in candidates_data:
-                score.candidate.delete()
+            if score.candidate not in candidates_data:
+                score.delete()
 
-            candidates_data = list(filter(lambda x: x != score.candidate.id, candidates_data))
+            candidates_data = list(filter(lambda x: x != score.candidate, candidates_data))
 
         for candidate in candidates_data:
             Score.objects.create(
