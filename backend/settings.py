@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'api',
-    'background_task',
 ]
 
 MIDDLEWARE = [
@@ -136,6 +135,10 @@ EMAIL_SUBJECT = "Elektronické volby do školské rady"
 EMAIL_TEMPLATE = "Elektronické volby do školské rady, \n hlasujte: \n {code} \n"
 EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb do školní rady"
 EMAIL_RESULTS_TEMPLATE = "Bois, \n Diz resultz r rdy! \n click link free download now torrent, m8 : https://lamiFarma.kupteLamu/Lamič \n Boiz"
+
+# Printing info to console
+
+VERBOSE = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/

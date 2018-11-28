@@ -8,9 +8,9 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 import django
 django.setup()
 
-from api.task import repetitive
+from api.daemon import runtasks
 
-schedule.every(5).seconds.do(repetitive)
+schedule.every(5).seconds.do(runtasks)
 
 while True:
     schedule.run_pending()
