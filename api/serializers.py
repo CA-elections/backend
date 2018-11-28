@@ -317,6 +317,7 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
             'votes_available': len(Vote.objects.filter(notification=instance)),
             'candidates': [
                 {
+                    'id': score.candidate.id,
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
@@ -342,7 +343,30 @@ class NotificationVoteSerializer(serializers.ModelSerializer):
     candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
 
     def update(self, instance, validated_data):
-        pass
+
+        candidates = validated_data['candidates']
+
+        votes_available = len(Vote.objects.filter(notification=instance))
+        votes_used = len(candidates)
+
+        # Assert user hasn't sent too many votes
+        if votes_used > votes_available:
+            raise serializers.ValidationError('Too many votes were sent. This link only has %d.' % votes_available)
+
+        # Set notification as used
+        instance.used = True
+        instance.save()
+
+        # Update candidate scores
+        for candidate in candidates:
+            try:
+                score = Score.objects.filter(election=instance.election, candidate=candidate)[0]
+            except IndexError:
+                raise serializers.ValidationError('One of the selected candidates (id = %d) isn\'t in the relevant election' % candidate.id)
+            score.votes += 1
+            score.save()
+
+        return instance
 
     class Meta:
         model = Notification

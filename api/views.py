@@ -151,6 +151,7 @@ class NotificationInfo(generics.RetrieveAPIView):
                 "votes_available": Number of votes available for the notification
                 "candidates": [ Array of candidates with their info
                     {
+                        "id": ID of the candidate,
                         "name": Name of the candidate,
                         "surname": Surname of the candidate,
                         "is_student": If is candidate student,
