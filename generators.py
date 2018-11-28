@@ -69,7 +69,7 @@ def addnewelection():
     stud = (random.randint(0, 1) == 0)
     elename = "The " + capfirst(genword()) + " Election"
     desc = "Please " + genverb() + " " + gennoun() + ". Thank you."
-    new_ele = Election(date_start=start, date_end=end, is_student=stud, name=elename, description=desc)
+    new_ele = Election(date_start=start, date_end=end, is_student=stud, name=elename, description=desc, are_notifs_generated=True)
     new_ele.save()
     c1, c2, c3 = Candidate.objects.filter(is_student=stud).order_by('?').all()[:3]
     vot1 = vot2 = vot3 = 0
@@ -135,21 +135,8 @@ def addnewelection():
                 new_vote.save()
     # the election has not yet started -- generate all notifications and votes. None are sent nor used
     elif (now < start):
-        if (not stud):
-            notifs = bakalari_reader.get_all_youth_by_parent()
-            for notif in notifs:
-                new_notification = Notification(election=new_ele, sent=False, code=generatevotecode(), used=False)
-                new_notification.save()
-                for idstud in notif:
-                    new_vote = Vote(notification=new_notification, id_student=idstud)
-                    new_vote.save()
-        else:
-            notifs = bakalari_reader.get_all_oldenough()
-            for idstud in notifs:
-                new_notification = Notification(election=new_ele, sent=False, code=generatevotecode(), used=False)
-                new_notification.save()
-                new_vote = Vote(notification=new_notification, id_student=idstud)
-                new_vote.save()
+        new_ele.are_notifs_generated = False
+        new_ele.save()
     else:
         raise RuntimeError('unable to properly compare time?!')
     
