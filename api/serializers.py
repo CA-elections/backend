@@ -202,16 +202,6 @@ class ScoreSerializer(serializers.ModelSerializer):
 
 
 class ElectionGetAllSerializer(serializers.BaseSerializer):
-    """Build a list of elections in the format:
-       {
-         "id": id,
-         "date_start": date_start,
-         "date_end": date_end,
-         "is_student": is_student,
-         "description": description,
-         "name": name
-       }
-    """
     def to_representation(self, instance):
         data = {
             'id': instance.id,
@@ -255,24 +245,6 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
 
 
 class AdminElectionSerializer(serializers.BaseSerializer):
-    """Build details about an election for admin in the format:
-       {
-         "id": id,
-         "date_start": date_start,
-         "date_end": date_end,
-         "is_student": is_student,
-         "description": description,
-         "name": name,
-         "candidates": [{
-           "id": candidate_id,
-           "name": candidate_name,
-           "surname": candidate_surname,
-           "is_student": candidate_is_student,
-           "annotation": candidate_annotation,
-           "votes": candidate_votes
-         }, ...]
-       }
-    """
     def to_representation(self, instance):
         return {
                 'id': instance.id,
