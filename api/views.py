@@ -33,14 +33,14 @@ class CandidateDetails(generics.RetrieveUpdateDestroyAPIView):
 
 class ElectionList(generics.ListCreateAPIView):
     """Build a list of elections in the format:
-       | {
-       |    "id": id,
-       |    "date_start": date_start,
-       |    "date_end": date_end,
-       |    "is_student": is_student,
-       |    "description": description,
-       |    "name": name
-       |  }
+       {
+         "id": id,
+         "date_start": date_start,
+         "date_end": date_end,
+         "is_student": is_student,
+         "description": description,
+         "name": name
+       }
     """
     queryset = Election.objects.all()
     get_serializer_class = get_serializer_getter(ElectionWriteSerializer, ElectionReadSerializer)
@@ -96,21 +96,21 @@ class ElectionGetAll(generics.ListAPIView):
 
 class AdminElectionDetails(generics.RetrieveAPIView):
     """Build details about an election for admin in the format:
-       |  {
-       |    "id": id,
-       |    "date_start": date_start,
-       |    "date_end": date_end,
-       |    "is_student": is_student,
-       |    "description": description,
-       |    "name": name,
-       |    "candidates": [{
-       |      "id": candidate_id,
-       |      "name": candidate_name,
-       |      "surname": candidate_surname,
-       |      "is_student": candidate_is_student,
-       |      "annotation": candidate_annotation,
-       |      "votes": candidate_votes
-       |    }, ...]
+       {
+         "id": id,
+         "date_start": date_start,
+         "date_end": date_end,
+         "is_student": is_student,
+         "description": description,
+         "name": name,
+         "candidates": [{
+           "id": candidate_id,
+           "name": candidate_name,
+           "surname": candidate_surname,
+           "is_student": candidate_is_student,
+           "annotation": candidate_annotation,
+           "votes": candidate_votes
+         }, ...]
        }
     """
     queryset = Election.objects.all()
