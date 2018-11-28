@@ -202,7 +202,16 @@ class ScoreSerializer(serializers.ModelSerializer):
 
 
 class ElectionGetAllSerializer(serializers.BaseSerializer):
-
+    """Build a list of elections in the format:
+       {
+         "id": id,
+         "date_start": date_start,
+         "date_end": date_end,
+         "is_student": is_student,
+         "description": description,
+         "name": name
+       }
+    """
     def to_representation(self, instance):
         data = {
             'id': instance.id,
@@ -244,8 +253,26 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
     def create(self, validated_data):
         raise NotImplementedError
 
-class AdminElectionSerializer(serializers.BaseSerializer):
 
+class AdminElectionSerializer(serializers.BaseSerializer):
+    """Build details about an election for admin in the format:
+       {
+         "id": id,
+         "date_start": date_start,
+         "date_end": date_end,
+         "is_student": is_student,
+         "description": description,
+         "name": name,
+         "candidates": [{
+           "id": candidate_id,
+           "name": candidate_name,
+           "surname": candidate_surname,
+           "is_student": candidate_is_student,
+           "annotation": candidate_annotation,
+           "votes": candidate_votes
+         }, ...]
+       }
+    """
     def to_representation(self, instance):
         return {
                 'id': instance.id,
@@ -276,7 +303,18 @@ class AdminElectionSerializer(serializers.BaseSerializer):
 
 
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
-
+    """This function will return information about one election identified by it's ID
+        in this format:
+        {
+        "id": <ID of the election>,
+        "date_start": <When has the election started>,
+        "date_end": <When will the election end>,
+        "is_student": <If is the election student>,
+        "name": <The name of the election>,
+        "description": <The description of the election>,
+        "candidates": <Array of candidates with info>
+        }
+    """
     def to_representation(self, instance):
         if instance.date_end > datetime.datetime.now().astimezone(pytz.timezone('Europe/Prague')):
             raise serializers.ValidationError('This Election is still in progress.')
