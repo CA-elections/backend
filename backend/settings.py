@@ -124,6 +124,8 @@ EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
 EMAIL_SUBJECT = "Elektronické volby do školské rady"
 EMAIL_TEMPLATE = "Elektronické volby do školské rady, \n hlasujte: \n {code} \n"
+EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb do školní rady"
+EMAIL_RESULTS_TEMPLATE = "Bois, \n Diz resultz r rdy! \n click link free download now torrent, m8 : https://lamiFarma.kupteLamu/Lamič \n Boiz"
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/

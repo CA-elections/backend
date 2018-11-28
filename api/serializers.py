@@ -7,6 +7,7 @@ import pytz
 import datetime
 import pytz
 
+
 class CandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
