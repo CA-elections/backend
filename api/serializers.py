@@ -7,6 +7,7 @@ import pytz
 import datetime
 import pytz
 
+
 class CandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
@@ -201,7 +202,16 @@ class ScoreSerializer(serializers.ModelSerializer):
 
 
 class ElectionGetAllSerializer(serializers.BaseSerializer):
-
+    """Build a list of elections in the format:
+       {
+         "id": id,
+         "date_start": date_start,
+         "date_end": date_end,
+         "is_student": is_student,
+         "description": description,
+         "name": name
+       }
+    """
     def to_representation(self, instance):
         data = {
             'id': instance.id,
