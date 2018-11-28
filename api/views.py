@@ -4,6 +4,7 @@ from .serializers import CandidateWriteSerializer, CandidateReadSerializer, Elec
     ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, \
     ScoreSerializer, ElectionGetAllSerializer, AdminElectionReadSerializer, AdminElectionWriteSerializer, ElectionGetResultsSerializer
 
+
 from .models import Candidate, Election, Notification, Vote, Score
 
 
@@ -145,3 +146,10 @@ class ElectionGetResults(generics.RetrieveAPIView):
     """
     queryset = Election.objects.all()
     serializer_class = ElectionGetResultsSerializer
+
+
+class NotificationInfo(generics.RetrieveAPIView):
+
+    queryset = Notification.objects.all()
+    serializer_class = NotificationInfoSerializer
+    lookup_field = "code"
