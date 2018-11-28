@@ -127,7 +127,7 @@ class ElectionReadSerializer(serializers.BaseSerializer):
 
 
 class NotificationWriteSerializer(serializers.ModelSerializer):
-    students = serializers.IntegerField(min_value=1)
+    students = serializers.ListField(child=serializers.IntegerField(min_value=1))
 
     def create(self, validated_data):
         students_data = validated_data.pop('students')
@@ -176,7 +176,7 @@ class NotificationReadSerializer(serializers.BaseSerializer):
             'used': instance.used,
             'students': [
                 {
-                    'id': vote.id_students,
+                    'id': vote.id_student,
                 } for vote in Vote.objects.filter(notification=instance)],
         }
 
@@ -223,8 +223,8 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
             if totalvotes == 0:
                 return data
             samevotes = 1
-            while (samevotes < scores.count()):
-                if (scores[samevotes - 1].votes == scores[samevotes].votes):
+            while samevotes < scores.count():
+                if scores[samevotes - 1].votes == scores[samevotes].votes:
                     samevotes += 1
                 else:
                     break
@@ -234,8 +234,6 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
                 data['winner_name'] = scores[0].candidate.name
                 data['winner_surname'] = scores[0].candidate.surname
         return data
-
-            
 
     def to_internal_value(self, data):
         raise NotImplementedError
@@ -278,18 +276,6 @@ class AdminElectionSerializer(serializers.BaseSerializer):
 
 
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
-    """This function will return information about one election identified by it's ID
-        in this format:
-        {
-        "id": <ID of the election>,
-        "date_start": <When has the election started>,
-        "date_end": <When will the election end>,
-        "is_student": <If is the election student>,
-        "name": <The name of the election>,
-        "description": <The description of the election>,
-        "candidates": <Array of candidates with info>
-        }
-    """
     def to_representation(self, instance):
         if instance.date_end > datetime.datetime.now().astimezone(pytz.timezone('Europe/Prague')):
             raise serializers.ValidationError('This Election is still in progress.')
@@ -320,4 +306,33 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
         raise NotImplementedError
 
     def create(self, validated_data):
+        raise NotImplementedError
+
+
+class NotificationInfoSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+
+        return {
+            'votes_available': len(Vote.objects.filter(notification=instance)),
+            'candidates': [
+                {
+                    'name': score.candidate.name,
+                    'surname': score.candidate.surname,
+                    'is_student': score.candidate.is_student,
+                    'annotation': score.annotation,
+                } for score in Score.objects.filter(election=instance.election)
+            ]
+        }
+
+    def to_internal_value(self, data):
+
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+
+        raise NotImplementedError
+
+    def create(self, validated_data):
+
         raise NotImplementedError
