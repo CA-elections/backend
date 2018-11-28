@@ -4,11 +4,13 @@ from .models import Candidate, Election, Notification, Vote, Score
 import datetime
 import pytz
 
+import datetime
+import pytz
 
 class CandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = ('id', 'annotation', 'name', 'surname', 'is_student')
+        fields = ('id', 'name', 'surname', 'is_student')
 
 
 class CandidateReadSerializer(serializers.BaseSerializer):
@@ -19,7 +21,6 @@ class CandidateReadSerializer(serializers.BaseSerializer):
             'is_student': instance.is_student,
             'name': instance.name,
             'surname': instance.surname,
-            'annotation': instance.annotation,
             'elections': [
                 {
                     'id': election.id,
@@ -106,7 +107,7 @@ class ElectionReadSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.candidate.annotation,
+                    'annotation': score.annotation,
                     'votes': score.votes,
                 } for score in Score.objects.filter(election=instance)],
         }
@@ -195,14 +196,14 @@ class VoteSerializer(serializers.ModelSerializer):
 class ScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Score
-        fields = ('id', 'candidate', 'election', 'votes')
+        fields = ('id', 'candidate', 'election', 'votes', 'annotation')
         read_only_fields = ('id',)
 
 
 class ElectionGetAllSerializer(serializers.BaseSerializer):
 
     def to_representation(self, instance):
-        return {
+        data = {
             'id': instance.id,
             'date_start': instance.date_start,
             'date_end': instance.date_end,
@@ -210,6 +211,28 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
             'description': instance.description,
             'name': instance.name,
         }
+        # adding information about who has won this election
+        if instance.date_end < datetime.datetime.now(pytz.timezone('Europe/Prague')):
+            totalvotes = 0
+            scores = Score.objects.filter(election=instance).order_by('-votes')
+            for score in scores:
+                totalvotes += score.votes
+            if totalvotes == 0:
+                return data
+            samevotes = 1
+            while (samevotes < scores.count()):
+                if (scores[samevotes - 1].votes == scores[samevotes].votes):
+                    samevotes += 1
+                else:
+                    break
+            data['percentage'] = scores[0].votes / totalvotes
+            data['num_winners'] = samevotes
+            if samevotes == 1:
+                data['winner_name'] = scores[0].candidate.name
+                data['winner_surname'] = scores[0].candidate.surname
+        return data
+
+            
 
     def to_internal_value(self, data):
         raise NotImplementedError
@@ -236,7 +259,7 @@ class AdminElectionSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'anotation': score.candidate.anotation,
+                    'annotation': score.annotation,
                     'votes': score.votes,
                 } for score in Score.objects.filter(election=instance).order_by('-votes')],
         }
@@ -270,8 +293,8 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.candidate.annotation,
-                    'percents': 0 if not Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+                    'annotation': score.annotation,
+                    'percentage': 0 if not Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
                 } for score in Score.objects.filter(election=instance)],
         }
 
