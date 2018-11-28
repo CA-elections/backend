@@ -137,7 +137,7 @@ class ElectionGetResults(generics.RetrieveAPIView):
                     "annotation": Description of the candidate
                     "votes": How many votes has the candidate
                 }
-            ]
+        ]
         }
     """
     queryset = Election.objects.all()
