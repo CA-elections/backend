@@ -100,6 +100,14 @@ class ElectionGetAll(generics.ListAPIView):
     serializer_class = ElectionGetAllSerializer
 
 
+class AdminElectionList(generics.ListCreateAPIView):
+    permission_classes = (IsAdminUser,)
+
+    queryset = Election.objects.all()
+    get_serializer_class = get_serializer_getter(AdminElectionWriteSerializer, AdminElectionReadSerializer)
+
+
+
 class AdminElectionDetails(generics.RetrieveUpdateDestroyAPIView):
     """
     Build details about an election for admin in the format:\n
@@ -150,7 +158,6 @@ class ElectionGetResults(generics.RetrieveAPIView):
         ]
         }
     """
-    permission_classes = (IsAdminUser,)
 
     queryset = Election.objects.all()
     serializer_class = ElectionGetResultsSerializer
