@@ -15,3 +15,9 @@ pyenv/
 
 # swapfiles
 *.swp
+
+# debug.log
+debug.log
+
+# temporary file folder
+tmp

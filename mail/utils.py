@@ -39,4 +39,32 @@ def send_emails_with_code(election=None):
 
 
 def send_emails_with_results(election=None):
-    raise NotImplementedError
+    now = datetime.datetime.now(tz)
+    if election is None:
+        notifications = Notification.objects.filter(election__are_results_sent=False,
+                                                    election__date_end__lt=now)
+    else:
+        notifications = Notification.objects.filter(election__are_results_sent=False,
+                                                    election__date_end__lt=now,
+                                                    election=election)
+    for n in notifications:
+        if not n.votes.count():
+            continue
+        v = n.votes.first()
+        if n.election.is_student:
+            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT, settings.EMAIL_RESULTS_TEMPLATE,
+                               to=[bakalari_reader.get_student_email(v.id_student)])
+        else:
+            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT, settings.EMAIL_RESULTS_TEMPLATE,
+                               to=[bakalari_reader.get_parent_email(v.id_student)])
+        try:
+            if not n.election.are_results_sent:
+                msg.send()
+        except SMTPException:
+            pass
+        else:
+            n.election.are_results_sent = True
+            n.election.save()
+
+
+
