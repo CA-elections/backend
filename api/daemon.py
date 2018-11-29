@@ -10,7 +10,7 @@ tz = timezone(settings.TIME_ZONE)
 
 def generate_notifications():
     now = datetime.datetime.now(tz)
-    for election in Election.objects.filter(are_notifs_generated=False, date_start__lte=now, date_end__gt==now):
+    for election in Election.objects.filter(are_notifs_generated=False, date_start__lte=now, date_end__gt=now):
         log("generating notifications (and votes) for an election (name: " + election.name + ")")
         log("election started at " + str(election.date_start))
         if not election.is_student:
@@ -38,8 +38,8 @@ def runtasks():
     log("RUNNING ROUTINE AUTOMATED TASKS at " + str(datetime.datetime.now(tz)))
     log("checking for running elections without notifications generated")
     generate_notifications()
-    # log("sending unsent voting notifications")
-    # send_emails_with_code()
-    # log("sending unsent results emails")
-    # send_emails_with_resuls()
+    log("sending unsent voting notifications")
+    send_emails_with_code()
+    log("sending unsent results emails")
+    send_emails_with_results()
     print("ROUTINE AUTOMATED TASKS FINISHED")
