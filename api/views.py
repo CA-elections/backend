@@ -259,7 +259,7 @@ class NotificationVote(viewsets.ViewSet):
                 }, status=status.HTTP_404_NOT_FOUND)
             elif len(found) > 1:
                 raise Exception("Multiple candidates with the same id exist in the database")
-            candidates.append(found.pop())
+            candidates.append(found[0])
 
         # Assert election is in progress
         if not notification.election.date_start < datetime.now(timezone(settings.TIME_ZONE)) < notification.election.date_end:
