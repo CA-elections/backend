@@ -224,20 +224,20 @@ class NotificationVote(viewsets.ViewSet):
         coreapi.Field(
             "candidates",
             required=True,
-            location="body",
+            location="form",
             schema=coreschema.Array()
-        )
+        ),
     ])
 
     @staticmethod
     def create(request, code):
 
         # Get candidate ids from the request
-        if not request.data or request.data is None:
+        if "candidates" not in request.data:
             return response.Response({
                 "error": "Candidates field required."
             }, status=status.HTTP_400_BAD_REQUEST)
-        candidate_ids = request.data
+        candidate_ids = request.data["candidates"]
 
         # Fetch notification object from database
         notifications = Notification.objects.filter(code=code)
@@ -250,12 +250,16 @@ class NotificationVote(viewsets.ViewSet):
         notification = notifications[0]
 
         # Fetch candidate objects from database
-        try:
-            candidates = [Candidate.objects.filter(id=x)[0] for x in candidate_ids]
-        except ValueError:
-            return response.Response({
-                "error": "At least one of the candidate ids is invalid."
-            }, status=status.HTTP_404_NOT_FOUND)
+        candidates = []
+        for candidate_id in candidate_ids:
+            found = Candidate.objects.filter(id=candidate_id)
+            if not found:
+                return response.Response({
+                    "error": "At least one of the candidate ids is invalid."
+                }, status=status.HTTP_404_NOT_FOUND)
+            elif len(found) > 1:
+                raise Exception("Multiple candidates with the same id exist in the database")
+            candidates.append(found[0])
 
         # Assert election is in progress
         if not notification.election.date_start < datetime.now(timezone(settings.TIME_ZONE)) < notification.election.date_end:
