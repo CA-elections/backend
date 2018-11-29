@@ -45,12 +45,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',
     'api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -129,12 +131,23 @@ DEFAULT_FROM_EMAIL = 'noreply@gjk.cz'
 EMAIL_HOST_USER = 'cavolbymail@gmail.com'
 EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = 'tmp/'
 EMAIL_SUBJECT = "Elektronické volby do školské rady"
 EMAIL_TEMPLATE = "Elektronické volby do školské rady, \n hlasujte: \n {code} \n"
 EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb do školní rady"
 EMAIL_RESULTS_TEMPLATE = "Bois, \n Diz resultz r rdy! \n click link free download now torrent, m8 : https://lamiFarma.kupteLamu/Lamič \n Boiz"
 
+# Printing info to console
+
+VERBOSE = True
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# TODO Set this to False!!!
+
+CORS_ORIGIN_ALLOW_ALL = True

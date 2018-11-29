@@ -6,17 +6,24 @@ import random
 import datetime
 
 from datetime import date
+from pytz import timezone
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 import django
+
 django.setup()
+
+from django.conf import settings
+
+tz = timezone(settings.TIME_ZONE)
 
 from api.models import Candidate, Election, Score, Notification, Vote
 import bakalari_reader
+from logger import log
 
 # generates a random date a few days before or after today
 def datearoundnow():
-    return datetime.datetime(2018, 11, 30) + datetime.timedelta(days=random.randint(-20, 30))
+    return tz.localize(datetime.datetime(2018, 11, 30)) + datetime.timedelta(days=random.randint(-20, 30))
 
 # generates a random date a few days after the date given
 def enddate(startdate):
@@ -73,7 +80,7 @@ def addnewelection():
     new_ele.save()
     c1, c2, c3 = Candidate.objects.filter(is_student=stud).order_by('?').all()[:3]
     vot1 = vot2 = vot3 = 0
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(tz)
 
     # the election is over -- generate random results, do not generate any notifications or votes
     if (end < now):
@@ -109,7 +116,9 @@ def addnewelection():
                                 vot2 += 1
                             elif val == 2:
                                 vot3 += 1
-                new_notification = Notification(election=new_ele, sent=issent, code=generatevotecode(), used=isused)
+                # TODO generate the code for the notification
+                # new_notification = Notification(election=new_ele, sent=issent, code=generatevotecode(), used=isused)
+                new_notification = Notification(election=new_ele, sent=issent, used=isused)
                 new_notification.save()
                 for idstud in notif:
                     new_vote = Vote(notification=new_notification, id_student=idstud)
@@ -129,7 +138,9 @@ def addnewelection():
                             vot2 += 1
                         elif val == 2:
                             vot3 += 1
-                new_notification = Notification(election=new_ele, sent=issent, code=generatevotecode(), used=isused)
+                # TODO generate the code for the notification
+                # new_notification = Notification(election=new_ele, sent=issent, code=generatevotecode(), used=isused)
+                new_notification = Notification(election=new_ele, sent=issent, used=isused)
                 new_notification.save()
                 new_vote = Vote(notification=new_notification, id_student=idstud)
                 new_vote.save()
@@ -176,18 +187,23 @@ def addcandidate(stud):
     new_cand.save()
 
 # database override
+log("deleting all candidates")
 Candidate.objects.all().delete()
 
+log("creating new random candidates")
 for i in range(12):
     addcandidate(random.randint(0, 1) == 0)
 
+log("creating student and non-student candidates")
 for i in range(3):
     addcandidate(True)
     addcandidate(False)
 
+log("deleting all elections, votes, notifications")
 Election.objects.all().delete()
 Vote.objects.all().delete()
 Notification.objects.all().delete()
 
+log("creating new elections: the already started ones also with votes and notifications")
 for i in range(7):
     addnewelection()
