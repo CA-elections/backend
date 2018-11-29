@@ -8,6 +8,7 @@ django-compat==1.0.15
 django-cors-headers==2.4.0
 django-filter==2.0.0
 djangorestframework==3.9.0
+django-cors-headers==2.4.0
 idna==2.7
 itypes==1.1.0
 Jinja2==2.10
