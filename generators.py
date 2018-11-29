@@ -70,9 +70,7 @@ def capfirst(word):
 
 # generates and adds to the database a random election. Simulates votes at random if the election has already started
 # uses the Candidate database to choose candidates from there
-def addnewelection():
-    start = datearoundnow()
-    end = enddate(start)
+def addnewelection(start, end):
     stud = (random.randint(0, 1) == 0)
     elename = "The " + capfirst(genword()) + " Election"
     desc = "Please " + genverb() + " " + gennoun() + ". Thank you."
@@ -186,4 +184,10 @@ Notification.objects.all().delete()
 
 log("creating new elections: the already started ones also with votes and notifications")
 for i in range(7):
-    addnewelection()
+    start = datearoundnow()
+    addnewelection(start, enddate(start))
+
+for i in range(4):
+    start = datetime.datetime.now(tz) + datetime.timedelta(days=random.randint(-3, -1))
+    end = datetime.datetime.now(tz) + datetime.timedelta(days=random.randint(2, 5))
+    addnewelection(start, end)
