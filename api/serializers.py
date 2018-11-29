@@ -84,7 +84,6 @@ class ElectionWriteSerializer(serializers.ModelSerializer):
         except KeyError:
             pass
 
-
         instance.date_start = validated_data.get('date_start', instance.date_start)
         instance.date_end = validated_data.get('date_end', instance.date_end)
         instance.is_student = validated_data.get('is_student', instance.is_student)
@@ -255,6 +254,12 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
 
 class AdminElectionReadSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
+        possible_votes = 0
+        for notif in Notification.object.filter(election=instance):
+            possible_votes += Vote.object.filter(notification=notif)
+        votes_cast = 0
+        for score in Score.object.filter(election=instance):
+            votes_cast += score.votes
         return {
                 'id': instance.id,
                 'date_start': instance.date_start,
@@ -271,6 +276,8 @@ class AdminElectionReadSerializer(serializers.BaseSerializer):
                     'annotation': score.candidate.annotation,
                     'votes': score.votes,
                 } for score in Score.objects.filter(election=instance).order_by('-votes')],
+                'possible_votes': possible_votes,
+                'votes_cast': votes_cast,
         }
 
     def to_internal_value(self, data):

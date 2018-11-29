@@ -47,7 +47,15 @@ def send_emails_with_results(election=None):
         notifications = Notification.objects.filter(election__are_results_sent=False,
                                                     election__date_end__lt=now,
                                                     election=election)
+    current_election = None
+    election_changed = True
+    results_not_send = False
     for n in notifications:
+        if current_election != n.election.pk:
+            current_election = n.election.pk
+            election_changed = True
+            if not n.election.are_results_sent:
+                results_not_send = True
         if not n.votes.count():
             continue
         v = n.votes.first()
@@ -57,12 +65,9 @@ def send_emails_with_results(election=None):
         else:
             msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT, settings.EMAIL_RESULTS_TEMPLATE,
                                to=[bakalari_reader.get_parent_email(v.id_student)])
-        try:
-            if not n.election.are_results_sent:
-                msg.send()
-        except SMTPException:
-            pass
-        else:
+        if results_not_send:
+            msg.send(fail_silently=True)
+        if election_changed and results_not_send:
             n.election.are_results_sent = True
             n.election.save()
 
