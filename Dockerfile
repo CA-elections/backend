@@ -19,6 +19,7 @@ RUN cd /
 
 RUN python /src/manage.py makemigrations
 RUN python /src/manage.py migrate
+RUN python /src/manage.py collectstatic
 
 CMD ["python", "/src/manage.py" , "runserver", "0.0.0.0:80"]
 EXPOSE 80
