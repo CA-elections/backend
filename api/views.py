@@ -158,12 +158,12 @@ class AdminElectionDetails(generics.RetrieveUpdateDestroyAPIView):
 
 class ElectionGetResults(generics.RetrieveAPIView):
     """
-    Returns information about one election identified by it's ID in this format:\n
+    Available to any user (does not need admin access). Returns information about one election identified by it's ID in this format:\n
         {
             "id": ID of the election,
-            "date_start": When has the election started,
-            "date_end": When will the election end,
-            "is_student": If is the election student,
+            "date_start": When the election starts,
+            "date_end": When the election ends,
+            "is_student": If the election is student,
             "name": The name of the election,
             "description": The description of the election,
             "candidates": [ Array of candidates with their info
@@ -173,10 +173,12 @@ class ElectionGetResults(generics.RetrieveAPIView):
                     "surname": Surname of the candidate,
                     "is_student": If is candidate student,
                     "annotation": Description of the candidate
-                    "votes": How many votes has the candidate
+                    (*) "percentage": The fraction of votes cast the candidate has got (between 0 and 1)
                 }
             ]
         }
+       (*) only sends the percentage if the election has already ended 
+        
     """
 
     queryset = Election.objects.all()
@@ -185,19 +187,10 @@ class ElectionGetResults(generics.RetrieveAPIView):
 
 class NotificationInfo(generics.RetrieveAPIView):
     """
-        Returns how many votes does a notification have and general info about candidates in the relevant election\n
+        Returns how many votes a notification has and the election id this notification is linked to\n
             {
                 "election_id": Id of the relevant election
                 "votes_available": Number of votes available for the notification
-                "candidates": [ Array of candidates with their info
-                    {
-                        "id": ID of the candidate,
-                        "name": Name of the candidate,
-                        "surname": Surname of the candidate,
-                        "is_student": If is candidate student,
-                        "annotation": Description of the candidate
-                    }
-                ]
             }
     """
     queryset = Notification.objects.all()
@@ -209,10 +202,10 @@ class NotificationVote(viewsets.ViewSet):
 
     description = """
     Endpoint for voting. Returns how many votes were used and how many were available.\n
-    {
-        "votes_available": Number of votes that were available
-        "votes_used": Number of votes used
-    }
+        {
+            "votes_available": Number of votes that were available
+            "votes_used": Number of votes used
+        }
     """
     schema = ManualSchema(encoding="application/json", description=description, fields=[
         coreapi.Field(
