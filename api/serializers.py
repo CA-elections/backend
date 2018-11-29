@@ -236,7 +236,7 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
                 else:
                     break
             data['percentage'] = scores[0].votes / totalvotes
-            data['num_winnders'] = samevotes
+            data['num_winners'] = samevotes
             if samevotes == 1:
                 data['winner_name'] = scores[0].candidate.name
                 data['winner_surname'] = scores[0].candidate.surname
