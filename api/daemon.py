@@ -8,6 +8,7 @@ from mail.utils import send_emails_with_code, send_emails_with_results
 
 tz = timezone(settings.TIME_ZONE)
 
+
 def generate_notifications():
     now = datetime.datetime.now(tz)
     for election in Election.objects.filter(are_notifs_generated=False, date_start__lte=now, date_end__gt=now):
