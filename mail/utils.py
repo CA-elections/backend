@@ -57,9 +57,14 @@ def send_emails_with_results(election=None):
         else:
             msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT, settings.EMAIL_RESULTS_TEMPLATE,
                                to=[bakalari_reader.get_parent_email(v.id_student)])
-        msg.send(fail_silently=True)
-        if n.election.are_results_sent==False:
+        try:
+            if not n.election.are_results_sent:
+                msg.send()
+        except SMTPException:
+            pass
+        else:
             n.election.are_results_sent = True
             n.election.save()
+
 
 
