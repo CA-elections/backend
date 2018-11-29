@@ -1,10 +1,12 @@
 from django.core.mail import EmailMessage
 from smtplib import SMTPException
 from api.models import Notification
+from api.models import Score
 from django.conf import settings
 import datetime
 import bakalari_reader
 from pytz import timezone
+from django.db.models import Max
 
 tz = timezone(settings.TIME_ZONE)
 
@@ -25,10 +27,10 @@ def send_emails_with_code(election=None):
             continue
         v = n.votes.first()
         if n.election.is_student:
-            msg = EmailMessage(settings.EMAIL_SUBJECT, settings.EMAIL_TEMPLATE.format(code=n.code),
+            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name=n.election.name), settings.EMAIL_TEMPLATE.format(code=n.code, description=n.election.description, name=n.election.name),
                                to=[bakalari_reader.get_student_email(v.id_student)])
         else:
-            msg = EmailMessage(settings.EMAIL_SUBJECT, settings.EMAIL_TEMPLATE.format(code=n.code), to=[bakalari_reader.get_parent_email(v.id_student)])
+            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name=n.election.name), settings.EMAIL_TEMPLATE.format(code=n.code, description=n.election.description, name=n.election.name), to=[bakalari_reader.get_parent_email(v.id_student)])
         try:
             msg.send()
         except SMTPException:
@@ -59,11 +61,15 @@ def send_emails_with_results(election=None):
         if not n.votes.count():
             continue
         v = n.votes.first()
+        if(Score.objects.filter(election__pk=n.election.pk).order_by('-votes')[0].votes == Score.objects.filter(election__pk=n.election.pk).order_by('-votes')[1].votes):
+            election_results = "Volby skončili remízou"
+        else:
+            election_results = "Volby vyhrál kandidát " + Score.objects.filter(election__pk=n.election.pk).order_by('-votes').first().candidate.name+" "+Score.objects.filter(election__pk=n.election.pk).order_by('-votes').first().candidate.surname
         if n.election.is_student:
-            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT, settings.EMAIL_RESULTS_TEMPLATE,
+            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT.format(name=n.election.name), settings.EMAIL_RESULTS_TEMPLATE.format(candidate=election_results),
                                to=[bakalari_reader.get_student_email(v.id_student)])
         else:
-            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT, settings.EMAIL_RESULTS_TEMPLATE,
+            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT.format(name=n.election.name), settings.EMAIL_RESULTS_TEMPLATE.format(candidate=election_results),
                                to=[bakalari_reader.get_parent_email(v.id_student)])
         if results_not_send:
             msg.send(fail_silently=True)

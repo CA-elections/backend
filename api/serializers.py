@@ -255,10 +255,10 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
 class AdminElectionReadSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         possible_votes = 0
-        for notif in Notification.object.filter(election=instance):
-            possible_votes += Vote.object.filter(notification=notif)
+        for notif in Notification.objects.filter(election=instance):
+            possible_votes += Vote.objects.filter(notification=notif)
         votes_cast = 0
-        for score in Score.object.filter(election=instance):
+        for score in Score.objects.filter(election=instance):
             votes_cast += score.votes
         return {
                 'id': instance.id,
@@ -376,17 +376,16 @@ class AdminCandidateReadSerializer(serializers.BaseSerializer):
 
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
-        if instance.date_end > datetime.datetime.now(tz):
-            raise serializers.ValidationError('This Election is still in progress.')
-
-        return {
+        response = {
             'id': instance.id,
             'date_start': instance.date_start,
             'date_end': instance.date_end,
             'is_student': instance.is_student,
             'name': instance.name,
             'description': instance.description,
-            'candidates': [
+        }
+        if instance.date_end <= datetime.datetime.now(tz):
+            response['candidates'] = [
                 {
                     'id': score.candidate.id,
                     'name': score.candidate.name,
@@ -395,8 +394,17 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
                     'annotation': score.candidate.annotation,
                     'percentage': 0 if not Score.objects.filter(election=instance)\
 .aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
-                } for score in Score.objects.filter(election=instance)],
-        }
+                } for score in Score.objects.filter(election=instance)]
+        else:
+            response['candidates'] = [
+                {
+                    'id': score.candidate.id,
+                    'name': score.candidate.name,
+                    'surname': score.candidate.surname,
+                    'is_student': score.candidate.is_student,
+                    'annotation': score.candidate.annotation,
+                } for score in Score.objects.filter(election=instance)]
+        return response
 
     def to_internal_value(self, data):
         raise NotImplementedError
@@ -414,16 +422,7 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
 
         return {
             'election_id': instance.election.id,
-            'votes_available': len(Vote.objects.filter(notification=instance)),
-            'candidates': [
-                {
-                    'id': score.candidate.id,
-                    'name': score.candidate.name,
-                    'surname': score.candidate.surname,
-                    'is_student': score.candidate.is_student,
-                    'annotation': score.candidate.annotation,
-                } for score in Score.objects.filter(election=instance.election)
-            ]
+            'votes_available': len(Vote.objects.filter(notification=instance))
         }
 
     def to_internal_value(self, data):
