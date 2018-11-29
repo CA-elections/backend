@@ -300,3 +300,112 @@ class NotificationVote(viewsets.ViewSet):
             "votes_available": votes_available,
             "votes_used": votes_used
         }, status=status.HTTP_202_ACCEPTED)
+
+
+class AdminElectionWriteSpecial(viewsets.ViewSet):
+
+    description = """
+    Special endpoint for creating an election that also creates all the students for the election.\n
+    WARNING: We shouldn't be doing this. Frontend should create all the students individually and then create an eleciton.\n
+    Response:
+    {
+        TODO
+    }\n
+    The "candidates" array in the request body json should contain json objects each representing a candidate structured like this:\n
+    {
+        "name": Name of the candidate,
+        "surname": Surname of the candidate,
+        "is_student": If the candidate is a student (not required),
+        "annotation": Short description of the candidate (not required)
+    }
+    """
+    schema = ManualSchema(encoding="application/json", description=description, fields=[
+        coreapi.Field(
+            "date_start",
+            required=True,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "date_end",
+            required=True,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "is_student",
+            required=False,
+            location="form",
+            schema=coreschema.Boolean()
+        ),
+        coreapi.Field(
+            "name",
+            required=True,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "description",
+            required=False,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "candidates",
+            required=True,
+            location="form",
+            schema=coreschema.Array()
+        )
+    ])
+
+    @staticmethod
+    def create(request):
+
+        # Check the request data
+        if "date_start" not in request.data:
+            return response.Response({
+                "error": "date_start field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if "date_end" not in request.data:
+            return response.Response({
+                "error": "date_end field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if "name" not in request.data:
+            return response.Response({
+                "error": "name field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if "candidates" not in request.data:
+            return response.Response({
+                "error": "is_student field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+        candidates_data = request.data.pop("candidates")
+
+        for candidate_data in candidates_data:
+            if "name" not in candidate_data:
+                return response.Response({
+                    "error": "name field required inside all candidate objects."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if "surname" not in candidate_data:
+                return response.Response({
+                    "error": "surname field required inside all candidate objects."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the election
+        election = Election(**request.data)
+        election.save()
+
+        # Create all the candidates
+        # (if something were to happen to the server, there will be zombie candidates without an election)
+        for candidate_data in candidates_data:
+            candidate = Candidate(**candidate_data)
+            candidate.save()
+            score = Score(candidate=candidate, election=election)
+            score.save()
+
+        return response.Response({
+            "election_id": election.id
+        }, status=status.HTTP_202_ACCEPTED)
