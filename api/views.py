@@ -103,7 +103,6 @@ class ElectionGetAll(generics.ListAPIView):
 
 class AdminCandidateList(generics.ListCreateAPIView):
     permission_classes = (IsAdminUser,)
-    #authentication_classes = (TokenAuthentication, BasicAuthentication)
     queryset = Candidate.objects.all()
     get_serializer_class = get_serializer_getter(AdminCandidateWriteSerializer, AdminCandidateReadSerializer)
 
@@ -117,7 +116,6 @@ class AdminCandidateDetails(generics.RetrieveUpdateDestroyAPIView):
 
 class AdminElectionList(generics.ListCreateAPIView):
     permission_classes = (IsAdminUser,)
-    #authentication_classes = (TokenAuthentication, BasicAuthentication)
 
     queryset = Election.objects.all()
     get_serializer_class = get_serializer_getter(AdminElectionWriteSerializer, AdminElectionReadSerializer)
@@ -145,7 +143,6 @@ class AdminElectionDetails(generics.RetrieveUpdateDestroyAPIView):
     """
 
     permission_classes = (IsAdminUser,)
-    #authentication_classes = (TokenAuthentication, BasicAuthentication)
 
     queryset = Election.objects.all()
     get_serializer_class = get_serializer_getter(AdminElectionWriteSerializer, AdminElectionReadSerializer)
