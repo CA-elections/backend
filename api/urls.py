@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^election/(?P<pk>[0-9]+)/$', ElectionGetResults.as_view()),
 
     url(r'^notification/(?P<code>.+)/$', NotificationInfo.as_view()),
-    url(r'^vote/(?P<code>.+)/$', NotificationVote.as_view()),
+    url(r'^vote/(?P<code>.+)/$', NotificationVote.as_view(actions={'post': 'create'})),
 
     url(r'^test/candidate/$', CandidateList.as_view()),
     url(r'^test/candidate/(?P<pk>[0-9]+)/$', CandidateDetails.as_view()),

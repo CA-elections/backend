@@ -43,13 +43,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework',
     'corsheaders',
     'api',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -147,7 +148,8 @@ VERBOSE = True
 
 STATIC_URL = '/static/'
 
-
 # TODO Set this to False!!!
-
 CORS_ORIGIN_ALLOW_ALL = True
+
+if not DEBUG and CORS_ORIGIN_ALLOW_ALL:
+    raise NotImplementedError("How is it possible that you have allowed all cors origins in production? Are you serious or is it just a bad joke?")
