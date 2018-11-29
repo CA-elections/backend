@@ -100,14 +100,26 @@ def addnewelection(start, end):
     desc = "Please " + genverb() + " " + gennoun() + ". Thank you."
     new_ele = Election(date_start=start, date_end=end, is_student=stud, name=elename, description=desc, are_notifs_generated=True)
     new_ele.save()
+    now = datetime.datetime.now(tz)
+    
+    if now < start:
+        timestate = "not started"
+    elif now > end:
+        timestate = "already ended"
+    else:
+        timestate = "currently running"
+        
+    log("Created \"" + elename + "\"\t with id = " + str(new_ele.id) + ", is_student = " + str(stud) + ", date_start = " + str(start) + ", date_end = " + str(end) + " (" + timestate + ").")
+
     c1, c2, c3 = Candidate.objects.filter(is_student=stud).order_by('?').all()[:3]
     vot1 = vot2 = vot3 = 0
-    now = datetime.datetime.now(tz)
 
     # notification are not yet generated for the election
     if (now < start or (now < end and random.randint(0, 2) == 0)):
         new_ele.are_notifs_generated = False
         new_ele.save()
+        if now > start:
+            log("This running election does not have generated notifications.")
     # notification are alrady generated, some votes are casted
     else:
         vot1 = vot2 = vot3 = 0
