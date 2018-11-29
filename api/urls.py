@@ -7,7 +7,8 @@ from rest_framework.authtoken import views
 
 from .views import ElectionGetAll, CandidateList, CandidateDetails, ElectionList, ElectionDetails, NotificationList, \
     NotificationDetails, VoteList, VoteDetails, ScoreList, ScoreDetails, \
-    AdminElectionDetails, ElectionGetResults, NotificationInfo, AdminElectionList, NotificationVote
+    AdminElectionDetails, ElectionGetResults, NotificationInfo, AdminElectionList, NotificationVote, \
+    AdminCandidateList, AdminCandidateDetails
 
 urlpatterns = [
     url(r'^$', get_schema_view(title="API for Ca elections")),
@@ -33,6 +34,8 @@ urlpatterns = [
 
     url(r'^admin/election/$', AdminElectionList.as_view()),
     url(r'^admin/election/(?P<pk>[0-9]+)/$', AdminElectionDetails.as_view()),
+    url(r'^admin/candidate/$', AdminCandidateList.as_view()),
+    url(r'^admin/candidate/(?P<pk>[0-9]+)/$', AdminCandidateDetails.as_view()),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

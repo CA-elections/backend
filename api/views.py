@@ -3,7 +3,8 @@ from rest_framework import generics, permissions, views, response, exceptions, s
 from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, \
     ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, \
     ScoreSerializer, ElectionGetAllSerializer, AdminElectionReadSerializer, AdminElectionWriteSerializer, \
-    ElectionGetResultsSerializer, NotificationInfoSerializer, NotificationVoteSerializer
+    ElectionGetResultsSerializer, NotificationInfoSerializer, NotificationVoteSerializer, AdminCandidateWriteSerializer, \
+    AdminCandidateReadSerializer
 
 from .models import Candidate, Election, Notification, Vote, Score
 
@@ -100,13 +101,26 @@ class ElectionGetAll(generics.ListAPIView):
     serializer_class = ElectionGetAllSerializer
 
 
+class AdminCandidateList(generics.ListCreateAPIView):
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (TokenAuthentication, BasicAuthentication)
+    queryset = Candidate.objects.all()
+    get_serializer_class = get_serializer_getter(AdminCandidateWriteSerializer, AdminCandidateReadSerializer)
+
+
+class AdminCandidateDetails(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAdminUser,)
+    authentication_classes = (TokenAuthentication, BasicAuthentication)
+    queryset = Candidate.objects.all()
+    get_serializer_class = get_serializer_getter(AdminCandidateWriteSerializer, AdminCandidateReadSerializer)
+
+
 class AdminElectionList(generics.ListCreateAPIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = (TokenAuthentication, BasicAuthentication)
 
     queryset = Election.objects.all()
     get_serializer_class = get_serializer_getter(AdminElectionWriteSerializer, AdminElectionReadSerializer)
-
 
 
 class AdminElectionDetails(generics.RetrieveUpdateDestroyAPIView):
