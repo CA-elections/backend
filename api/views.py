@@ -252,7 +252,7 @@ class NotificationVote(viewsets.ViewSet):
         # Fetch candidate objects from database
         try:
             candidates = [Candidate.objects.filter(id=x)[0] for x in candidate_ids]
-        except ValueError:
+        except IndexError:
             return response.Response({
                 "error": "At least one of the candidate ids is invalid."
             }, status=status.HTTP_404_NOT_FOUND)
