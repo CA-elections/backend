@@ -10,6 +10,7 @@ class Candidate(models.Model):
     name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
     is_student = models.BooleanField(default=False)
+    annotation = models.TextField(default="")
 
 
 class Election(models.Model):
@@ -41,7 +42,6 @@ class Score(models.Model):
     election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name='candidates')
 
     votes = models.IntegerField(default=0)
-    annotation = models.TextField(default="")
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
