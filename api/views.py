@@ -224,20 +224,20 @@ class NotificationVote(viewsets.ViewSet):
         coreapi.Field(
             "candidates",
             required=True,
-            location="body",
+            location="form",
             schema=coreschema.Array()
-        )
+        ),
     ])
 
     @staticmethod
     def create(request, code):
 
         # Get candidate ids from the request
-        if not request.data or request.data is None:
+        if "candidates" not in request.data:
             return response.Response({
                 "error": "Candidates field required."
             }, status=status.HTTP_400_BAD_REQUEST)
-        candidate_ids = request.data
+        candidate_ids = request.data["candidates"]
 
         # Fetch notification object from database
         notifications = Notification.objects.filter(code=code)

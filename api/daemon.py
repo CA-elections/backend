@@ -8,6 +8,7 @@ from mail.utils import send_emails_with_code, send_emails_with_results
 
 tz = timezone(settings.TIME_ZONE)
 
+
 def generate_notifications():
     now = datetime.datetime.now(tz)
     for election in Election.objects.filter(are_notifs_generated=False, date_start__lte=now, date_end__gt=now):
@@ -16,7 +17,6 @@ def generate_notifications():
         if not election.is_student:
             notifs = bakalari_reader.get_all_youth_by_parent()
             for notif in notifs:
-                # TODO generate a code for the notification
                 new_notification = Notification(election=election, sent=False, used=False)
                 new_notification.save()
                 for idstud in notif:
@@ -25,7 +25,6 @@ def generate_notifications():
         else:
             notifs = bakalari_reader.get_all_oldenough()
             for idstud in notifs:
-                # TODO generate a code for the notification
                 new_notification = Notification(election=election, sent=False, used=False)
                 new_notification.save()
                 new_vote = Vote(notification=new_notification, id_student=idstud)

@@ -70,9 +70,7 @@ def capfirst(word):
 
 # generates and adds to the database a random election. Simulates votes at random if the election has already started
 # uses the Candidate database to choose candidates from there
-def addnewelection():
-    start = datearoundnow()
-    end = enddate(start)
+def addnewelection(start, end):
     stud = (random.randint(0, 1) == 0)
     elename = "The " + capfirst(genword()) + " Election"
     desc = "Please " + genverb() + " " + gennoun() + ". Thank you."
@@ -82,23 +80,12 @@ def addnewelection():
     vot1 = vot2 = vot3 = 0
     now = datetime.datetime.now(tz)
 
-    # the election is over -- generate random results, do not generate any notifications or votes
-    if (end < now):
-        possiblevotes = 0
-        if not stud:
-            notifs = bakalari_reader.get_all_youth_by_parent()
-            for notif in notifs:
-                possiblevotes += len(notif)
-        else:
-            possiblevotes = len(bakalari_reader.get_all_oldenough())
-        vot1 = random.randint(0, possiblevotes)
-        possiblevotes -= vot1
-        vot2 = random.randint(0, possiblevotes)
-        possiblevotes -= vot2
-        vot3 = random.randint(0, possiblevotes)
-        possiblevotes -= vot3
-    # the election is in progress -- generate all notifications and votes. Mark some of them sent, some used, or the used ones, choose the candidate who was voted for
-    elif (start < now and now < end):
+    # notification are not yet generated for the election
+    if (now < start or (now < end and random.randint(0, 2) == 0)):
+        new_ele.are_notifs_generated = False
+        new_ele.save()
+    # notification are alrady generated, some votes are casted
+    else:
         vot1 = vot2 = vot3 = 0
         if (not stud):
             notifs = bakalari_reader.get_all_youth_by_parent()
@@ -116,8 +103,6 @@ def addnewelection():
                                 vot2 += 1
                             elif val == 2:
                                 vot3 += 1
-                # TODO generate the code for the notification
-                # new_notification = Notification(election=new_ele, sent=issent, code=generatevotecode(), used=isused)
                 new_notification = Notification(election=new_ele, sent=issent, used=isused)
                 new_notification.save()
                 for idstud in notif:
@@ -138,22 +123,14 @@ def addnewelection():
                             vot2 += 1
                         elif val == 2:
                             vot3 += 1
-                # TODO generate the code for the notification
-                # new_notification = Notification(election=new_ele, sent=issent, code=generatevotecode(), used=isused)
                 new_notification = Notification(election=new_ele, sent=issent, used=isused)
                 new_notification.save()
                 new_vote = Vote(notification=new_notification, id_student=idstud)
                 new_vote.save()
-    # the election has not yet started -- generate all notifications and votes. None are sent nor used
-    elif (now < start):
-        new_ele.are_notifs_generated = False
-        new_ele.save()
-    else:
-        raise RuntimeError('unable to properly compare time?!')
     
-    new_score1 = Score(election=new_ele, candidate=c1, votes=vot1, annotation=generateannotation())
-    new_score2 = Score(election=new_ele, candidate=c2, votes=vot2, annotation=generateannotation())
-    new_score3 = Score(election=new_ele, candidate=c3, votes=vot3, annotation=generateannotation())
+    new_score1 = Score(election=new_ele, candidate=c1, votes=vot1)
+    new_score2 = Score(election=new_ele, candidate=c2, votes=vot2)
+    new_score3 = Score(election=new_ele, candidate=c3, votes=vot3)
     new_score1.save()
     new_score2.save()
     new_score3.save()
@@ -183,7 +160,8 @@ def genquality():
 def addcandidate(stud):
     firstname = capfirst(genword()) + " " + genfirstname()
     lastname = capfirst(genword())
-    new_cand = Candidate(name=firstname, surname=lastname, is_student=stud)
+    annotation=generateannotation()
+    new_cand = Candidate(name=firstname, surname=lastname, is_student=stud, annotation=annotation)
     new_cand.save()
 
 # database override
@@ -206,4 +184,10 @@ Notification.objects.all().delete()
 
 log("creating new elections: the already started ones also with votes and notifications")
 for i in range(7):
-    addnewelection()
+    start = datearoundnow()
+    addnewelection(start, enddate(start))
+
+for i in range(4):
+    start = datetime.datetime.now(tz) + datetime.timedelta(days=random.randint(-3, -1))
+    end = datetime.datetime.now(tz) + datetime.timedelta(days=random.randint(2, 5))
+    addnewelection(start, end)
