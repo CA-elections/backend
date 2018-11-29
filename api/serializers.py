@@ -12,7 +12,7 @@ tz = pytz.timezone(settings.TIME_ZONE)
 class CandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = ('id', 'name', 'surname', 'is_student')
+        fields = ('id', 'name', 'surname', 'is_student', 'annotation')
 
 
 class CandidateReadSerializer(serializers.BaseSerializer):
@@ -23,6 +23,7 @@ class CandidateReadSerializer(serializers.BaseSerializer):
             'is_student': instance.is_student,
             'name': instance.name,
             'surname': instance.surname,
+            'annotation': instance.annotation,
             'elections': [
                 {
                     'id': election.id,
@@ -114,7 +115,7 @@ class ElectionReadSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.annotation,
+                    'annotation': score.candidate.annotation,
                     'votes': score.votes,
                 } for score in Score.objects.filter(election=instance)],
         }
@@ -206,7 +207,7 @@ class VoteSerializer(serializers.ModelSerializer):
 class ScoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Score
-        fields = ('id', 'candidate', 'election', 'votes', 'annotation')
+        fields = ('id', 'candidate', 'election', 'votes')
         read_only_fields = ('id',)
 
 
@@ -272,7 +273,7 @@ class AdminElectionReadSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.annotation,
+                    'annotation': score.candidate.annotation,
                     'votes': score.votes,
                 } for score in Score.objects.filter(election=instance).order_by('-votes')],
                 'possible_votes': possible_votes,
@@ -333,7 +334,7 @@ class AdminElectionWriteSerializer(serializers.ModelSerializer):
 class AdminCandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
-        fields = ('id', 'name', 'surname', 'is_student')
+        fields = ('id', 'name', 'surname', 'is_student', 'annotation')
 
 
 class AdminCandidateReadSerializer(serializers.BaseSerializer):
@@ -344,6 +345,7 @@ class AdminCandidateReadSerializer(serializers.BaseSerializer):
             'is_student': instance.is_student,
             'name': instance.name,
             'surname': instance.surname,
+            'annotation': instance.annotation,
             'elections': [
                 {
                     'id': election.id,
@@ -385,12 +387,12 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
             'name': instance.name,
             'description': instance.description,
             'candidates': [
-            {
+                {
                     'id': score.candidate.id,
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.annotation,
+                    'annotation': score.candidate.annotation,
                     'percentage': 0 if not Score.objects.filter(election=instance)\
 .aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
                 } for score in Score.objects.filter(election=instance)],
@@ -419,7 +421,7 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
                     'name': score.candidate.name,
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
-                    'annotation': score.annotation,
+                    'annotation': score.candidate.annotation,
                 } for score in Score.objects.filter(election=instance.election)
             ]
         }
