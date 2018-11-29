@@ -3,12 +3,21 @@ from rest_framework import generics, permissions, views, response, exceptions, s
 from .serializers import CandidateWriteSerializer, CandidateReadSerializer, ElectionWriteSerializer, \
     ElectionReadSerializer, NotificationWriteSerializer, NotificationReadSerializer, VoteSerializer, \
     ScoreSerializer, ElectionGetAllSerializer, AdminElectionReadSerializer, AdminElectionWriteSerializer, \
-    ElectionGetResultsSerializer, NotificationInfoSerializer, NotificationVoteSerializer, AdminCandidateWriteSerializer, \
+    ElectionGetResultsSerializer, NotificationInfoSerializer, AdminCandidateWriteSerializer, \
     AdminCandidateReadSerializer
 
 from .models import Candidate, Election, Notification, Vote, Score
 
 from rest_framework.permissions import IsAdminUser
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.schemas import ManualSchema
+
+import coreapi
+import coreschema
+
+from django.conf import settings
+from pytz import timezone
+from datetime import datetime
 
 
 def get_serializer_getter(WriteSerializer, ReadSerializer):
@@ -178,6 +187,7 @@ class NotificationInfo(generics.RetrieveAPIView):
     """
         Returns how many votes does a notification have and general info about candidates in the relevant election\n
             {
+                "election_id": Id of the relevant election
                 "votes_available": Number of votes available for the notification
                 "candidates": [ Array of candidates with their info
                     {
@@ -189,14 +199,100 @@ class NotificationInfo(generics.RetrieveAPIView):
                     }
                 ]
             }
-        """
+    """
     queryset = Notification.objects.all()
     serializer_class = NotificationInfoSerializer
     lookup_field = "code"
 
 
-class NotificationVote(generics.UpdateAPIView):
+class NotificationVote(viewsets.ViewSet):
 
-    queryset = Notification.objects.all()
-    serializer_class = NotificationVoteSerializer
-    lookup_field = "code"
+    description = """
+    Endpoint for voting. Returns how many votes were used and how many were available.\n
+    {
+        "votes_available": Number of votes that were available
+        "votes_used": Number of votes used
+    }
+    """
+    schema = ManualSchema(encoding="application/json", description=description, fields=[
+        coreapi.Field(
+            "code",
+            required=True,
+            location="path",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "candidates",
+            required=True,
+            location="body",
+            schema=coreschema.Array()
+        )
+    ])
+
+    @staticmethod
+    def create(request, code):
+
+        # Get candidate ids from the request
+        if not request.data or request.data is None:
+            return response.Response({
+                "error": "Candidates field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+        candidate_ids = request.data
+
+        # Fetch notification object from database
+        notifications = Notification.objects.filter(code=code)
+        if not notifications:
+            return response.Response({
+                "error": "Code is invalid."
+            }, status=status.HTTP_404_NOT_FOUND)
+        elif len(notifications) > 1:
+            raise Exception("Multiple notifications with the same UUID exist in the database")
+        notification = notifications[0]
+
+        # Fetch candidate objects from database
+        try:
+            candidates = [Candidate.objects.filter(id=x)[0] for x in candidate_ids]
+        except ValueError:
+            return response.Response({
+                "error": "At least one of the candidate ids is invalid."
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Assert election is in progress
+        if not notification.election.date_start < datetime.now(timezone(settings.TIME_ZONE)) < notification.election.date_end:
+            return response.Response({
+                "error": "The election isn't in progress."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Assert notification isn't already used
+        if notification.used:
+            return response.Response({
+                "error": "This link has already been used"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Assert user hasn't sent too many votes
+        votes_available = len(Vote.objects.filter(notification=notification))
+        votes_used = len(candidates)
+        if votes_used > votes_available:
+            return response.Response({
+                "error": "Too many votes were sent. This link only has %d." % votes_available
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Set notification as used
+        notification.used = True
+        notification.save()
+
+        # Update candidate scores
+        for candidate in candidates:
+            try:
+                score = Score.objects.filter(election=notification.election, candidate=candidate)[0]
+            except IndexError:
+                return response.Response({
+                    "One of the selected candidates (id = %d) isn\"t in the relevant election" % candidate.id
+                }, status=status.HTTP_400_BAD_REQUEST)
+            score.votes += 1
+            score.save()
+
+        return response.Response({
+            "votes_available": votes_available,
+            "votes_used": votes_used
+        }, status=status.HTTP_202_ACCEPTED)
