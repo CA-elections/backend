@@ -8,6 +8,7 @@ import sys
 
 tz = pytz.timezone(settings.TIME_ZONE)
 
+
 class CandidateWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Candidate
@@ -81,7 +82,6 @@ class ElectionWriteSerializer(serializers.ModelSerializer):
                 )
         except KeyError:
             pass
-
 
         instance.date_start = validated_data.get('date_start', instance.date_start)
         instance.date_end = validated_data.get('date_end', instance.date_end)
