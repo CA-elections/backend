@@ -392,8 +392,8 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
                     'surname': score.candidate.surname,
                     'is_student': score.candidate.is_student,
                     'annotation': score.candidate.annotation,
-                    'percentage': 0 if not score.objects.filter(election=instance)\
-.aggregate(votes_sum=functions.coalesce(sum('votes'), 0))['votes_sum'] else score.votes / score.objects.filter(election=instance).aggregate(votes_sum=functions.coalesce(sum('votes'), 0))['votes_sum'],
+                    'percentage': 0 if not Score.objects.filter(election=instance)\
+.aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'] else score.votes / Score.objects.filter(election=instance).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
                 } for score in Score.objects.filter(election=instance)]
         else:
             response['candidates'] = [
