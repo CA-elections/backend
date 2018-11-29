@@ -19,6 +19,7 @@ class Election(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(default="")
     are_notifs_generated = models.BooleanField(default=False)
+    are_results_sent = models.BooleanField(default=False)
 
 
 class Notification(models.Model):
