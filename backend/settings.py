@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -136,8 +137,14 @@ EMAIL_TEMPLATE = "Elektronické volby do školské rady, \n hlasujte: \n {code} 
 EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb do školní rady"
 EMAIL_RESULTS_TEMPLATE = "Bois, \n Diz resultz r rdy! \n click link free download now torrent, m8 : https://lamiFarma.kupteLamu/Lamič \n Boiz"
 
+# Printing info to console
+
+VERBOSE = True
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# TODO Set this to False!!!
 CORS_ORIGIN_ALLOW_ALL = True
