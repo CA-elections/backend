@@ -323,6 +323,49 @@ class AdminElectionWriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'date_start', 'date_end', 'is_student', 'name', 'candidates', 'description')
 
 
+class AdminCandidateWriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Candidate
+        fields = ('id', 'name', 'surname', 'is_student')
+
+
+class AdminCandidateReadSerializer(serializers.BaseSerializer):
+
+    def to_representation(self, instance):
+        return {
+            'id': instance.id,
+            'is_student': instance.is_student,
+            'name': instance.name,
+            'surname': instance.surname,
+            'elections': [
+                {
+                    'id': election.id,
+                    'date_start': election.date_start,
+                    'date_end': election.date_end,
+                    'is_student': election.is_student,
+                    'name': election.name,
+                    'votes': Score.objects.filter(election=election).aggregate(votes_sum=functions.Coalesce(Sum('votes'), 0))['votes_sum'],
+                    'candidates': [
+                        {
+                            'id': candidate.id,
+                            'votes': votes,
+                        } for candidate, votes in map(lambda x: (x.candidate, x.votes), Score.objects.filter(election=election))
+                    ]
+                } for election in map(lambda x: x.election, Score.objects.filter(candidate=instance))
+            ],
+        }
+
+    def to_internal_value(self, data):
+        raise NotImplementedError
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+    def create(self, validated_data):
+        raise NotImplementedError
+
+
+
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         if instance.date_end > datetime.datetime.now().astimezone(pytz.timezone('Europe/Prague')):
