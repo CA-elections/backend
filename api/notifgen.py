@@ -5,7 +5,7 @@ import bakalari_reader
 
 def generate_notifications():
     now = datetime.datetime.now()
-    for election in Election.objects.filter(are_notifs_generated=False, date_start_gte=now):
+    for election in Election.objects.filter(are_notifs_generated=False, date_start__lte=now, date_end__gte=now):
         if not election.is_student:
             notifs = bakalari_reader.get_all_youth_by_parent()
             for notif in notifs:
