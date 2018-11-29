@@ -364,7 +364,6 @@ class AdminCandidateReadSerializer(serializers.BaseSerializer):
         raise NotImplementedError
 
 
-
 class ElectionGetResultsSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         if instance.date_end > datetime.datetime.now(tz):
@@ -404,6 +403,7 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
 
         return {
+            'election_id': instance.election.id,
             'votes_available': len(Vote.objects.filter(notification=instance)),
             'candidates': [
                 {
@@ -427,37 +427,3 @@ class NotificationInfoSerializer(serializers.BaseSerializer):
     def create(self, validated_data):
 
         raise NotImplementedError
-
-
-class NotificationVoteSerializer(serializers.ModelSerializer):
-    candidates = serializers.PrimaryKeyRelatedField(queryset=Candidate.objects.all(), many=True)
-
-    def update(self, instance, validated_data):
-
-        candidates = validated_data['candidates']
-
-        votes_available = len(Vote.objects.filter(notification=instance))
-        votes_used = len(candidates)
-
-        # Assert user hasn't sent too many votes
-        if votes_used > votes_available:
-            raise serializers.ValidationError('Too many votes were sent. This link only has %d.' % votes_available)
-
-        # Set notification as used
-        instance.used = True
-        instance.save()
-
-        # Update candidate scores
-        for candidate in candidates:
-            try:
-                score = Score.objects.filter(election=instance.election, candidate=candidate)[0]
-            except IndexError:
-                raise serializers.ValidationError('One of the selected candidates (id = %d) isn\'t in the relevant election' % candidate.id)
-            score.votes += 1
-            score.save()
-
-        return instance
-
-    class Meta:
-        model = Notification
-        fields = ('candidates',)
