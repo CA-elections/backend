@@ -151,9 +151,9 @@ def addnewelection():
     else:
         raise RuntimeError('unable to properly compare time?!')
     
-    new_score1 = Score(election=new_ele, candidate=c1, votes=vot1, annotation=generateannotation())
-    new_score2 = Score(election=new_ele, candidate=c2, votes=vot2, annotation=generateannotation())
-    new_score3 = Score(election=new_ele, candidate=c3, votes=vot3, annotation=generateannotation())
+    new_score1 = Score(election=new_ele, candidate=c1, votes=vot1)
+    new_score2 = Score(election=new_ele, candidate=c2, votes=vot2)
+    new_score3 = Score(election=new_ele, candidate=c3, votes=vot3)
     new_score1.save()
     new_score2.save()
     new_score3.save()
@@ -183,7 +183,8 @@ def genquality():
 def addcandidate(stud):
     firstname = capfirst(genword()) + " " + genfirstname()
     lastname = capfirst(genword())
-    new_cand = Candidate(name=firstname, surname=lastname, is_student=stud)
+    annotation=generateannotation()
+    new_cand = Candidate(name=firstname, surname=lastname, is_student=stud, annotation=annotation)
     new_cand.save()
 
 # database override
