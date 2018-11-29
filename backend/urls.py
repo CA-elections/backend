@@ -17,9 +17,10 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url, include
 from django.views import generic
+from django.views.generic import TemplateView
 
 urlpatterns = [
-    url(r'^$', generic.RedirectView.as_view(url='api/docs', permanent=False)),
+    url(r'^$', TemplateView.as_view(template_name='index.html')),
     path('admin/', admin.site.urls),
     url(r'^api$', generic.RedirectView.as_view(url='api/', permanent=True)),
     url(r'^api/', include('api.urls')),

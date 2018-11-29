@@ -1,5 +1,5 @@
-FROM python:3
-MAINTAINER jan.ruzicka01@gmail.com
+FROM python:3.7.1-alpine3.8
+MAINTAINER webmaster@gjk.cz
 
 ENV PYTHONBUFFERED 1
 
@@ -8,10 +8,17 @@ WORKDIR /src
 
 ADD requirements.txt /src/
 RUN pip install --no-cache-dir -r /src/requirements.txt
+RUN apk add nodejs npm
 
-ADD . /src/
+ADD . /src
 
-#RUN python /src/DockerTest/manage.py migrate
+RUN cd /src/frontend; npm install
+RUN npm install webpack
+RUN cd /src/frontend; /src/frontend/node_modules/.bin/webpack
+RUN cd /
 
-CMD ["python", "/src/DockerTest/manage.py" , "runserver"]
-EXPOSE 8000:8000
+RUN python /src/manage.py makemigrations
+RUN python /src/manage.py migrate
+
+CMD ["python", "/src/manage.py" , "runserver", "0.0.0.0:80"]
+EXPOSE 80
