@@ -64,20 +64,24 @@ class ElectionWriteSerializer(serializers.ModelSerializer):
         return election
 
     def update(self, instance, validated_data):
-        candidates_data = list(map(lambda x: x, validated_data.pop('candidates'))),
-        print(candidates_data)
-        sys.stderr.write(str(candidates_data) + "\n")
-        for score in Score.objects.filter(election=instance):
-            if score.candidate not in candidates_data:
-                score.delete()
+        try:
+            candidates_data = list(map(lambda x: x, validated_data.pop('candidates'))),
+            print(candidates_data)
+            sys.stderr.write(str(candidates_data) + "\n")
+            for score in Score.objects.filter(election=instance):
+                if score.candidate not in candidates_data:
+                    score.delete()
 
-            candidates_data = list(filter(lambda x: x != score.candidate, candidates_data))
+                candidates_data = list(filter(lambda x: x != score.candidate, candidates_data))
 
-        for candidate in candidates_data:
-            Score.objects.create(
-                candidate=candidate,
-                election=instance,
-            )
+            for candidate in candidates_data:
+                Score.objects.create(
+                    candidate=candidate,
+                    election=instance,
+                )
+        except KeyError:
+            pass
+
 
         instance.date_start = validated_data.get('date_start', instance.date_start)
         instance.date_end = validated_data.get('date_end', instance.date_end)
@@ -139,18 +143,21 @@ class NotificationWriteSerializer(serializers.ModelSerializer):
         return notification
 
     def update(self, instance, validated_data):
-        students_data = validated_data.pop('students')
-        for vote in Vote.objects.filter(notification=instance):
-            if vote.id_student not in students_data:
-                vote.delete()
+        try:
+            students_data = validated_data.pop('students')
+            for vote in Vote.objects.filter(notification=instance):
+                if vote.id_student not in students_data:
+                    vote.delete()
 
-            students_data = list(filter(lambda x: x != vote.id_student, students_data))
+                students_data = list(filter(lambda x: x != vote.id_student, students_data))
 
-        for student_id in students_data:
-            Vote.objects.create(
-                notification=instance,
-                id_student=student_id,
-            )
+            for student_id in students_data:
+                Vote.objects.create(
+                    notification=instance,
+                    id_student=student_id,
+                )
+        except KeyError:
+            pass
 
         instance.election = validated_data.get('election', instance.election)
         instance.sent = validated_data.get('sent', instance.sent)
