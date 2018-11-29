@@ -150,3 +150,6 @@ STATIC_URL = '/static/'
 
 # TODO Set this to False!!!
 CORS_ORIGIN_ALLOW_ALL = True
+
+if DEBUG and CORS_ORIGIN_ALLOW_ALL:
+    raise NotImplementedError("How is it possible that you have allowed all cors origins in production? Are you serious or is it just a bad joke?")
