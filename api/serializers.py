@@ -255,10 +255,10 @@ class ElectionGetAllSerializer(serializers.BaseSerializer):
 class AdminElectionReadSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         possible_votes = 0
-        for notif in Notification.object.filter(election=instance):
-            possible_votes += Vote.object.filter(notification=notif)
+        for notif in Notification.objects.filter(election=instance):
+            possible_votes += Vote.objects.filter(notification=notif)
         votes_cast = 0
-        for score in Score.object.filter(election=instance):
+        for score in Score.objects.filter(election=instance):
             votes_cast += score.votes
         return {
                 'id': instance.id,
