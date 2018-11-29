@@ -88,20 +88,29 @@ def gennoun():
     nouns = ['the hill', 'the Sun', 'the Earth', 'the numbers', 'the flowers', 'me', 'everyone', 'a cup', 'any thought', 'the rest of the cake', 'aliens', 'philosophy', 'fun', 'power', 'an end']
     return nouns[random.randint(0, len(nouns) - 1)]
 
-# returns the given word with the first letter capitalized
+"""
+Returns the given string with the first character capitalized.
+"""
 def capfirst(word):
     return word[0].capitalize() + word[1:]
 
-# generates and adds to the database a random election. Simulates votes at random if the election has already started
-# uses the Candidate database to choose candidates from there
+"""
+Randomly generates a new election and adds it to the database.
+That also might include Vote and Notification objects being added to the respective databases. These modifications also use elements of randomness.
+The created elections use candidates already present in the Candidate database.
+"""
 def addnewelection(start, end):
+    # whether the election should be a student election
     stud = (random.randint(0, 1) == 0)
+
+    # the election object
     elename = "The " + capfirst(genword()) + " Election"
     desc = "Please " + genverb() + " " + gennoun() + ". Thank you."
     new_ele = Election(date_start=start, date_end=end, is_student=stud, name=elename, description=desc, are_notifs_generated=True)
     new_ele.save()
     now = datetime.datetime.now(tz)
     
+    # logging of the creation
     if now < start:
         timestate = "not started"
     elif now > end:
@@ -114,24 +123,32 @@ def addnewelection(start, end):
     c1, c2, c3 = Candidate.objects.filter(is_student=stud).order_by('?').all()[:3]
     vot1 = vot2 = vot3 = 0
 
-    # notification are not yet generated for the election
+    # notifications are not yet generated for the election
     if (now < start or (now < end and random.randint(0, 2) == 0)):
         new_ele.are_notifs_generated = False
         new_ele.save()
         if now > start:
             log("This running election does not have generated notifications.")
-    # notification are alrady generated, some votes are casted
+    # notifications are alrady generated, some votes are casted
     else:
+        # number of votes for each of the three candidates in this election
         vot1 = vot2 = vot3 = 0
+        
+        # this is a student election
         if (not stud):
+            # all the notifications that should be created (notifications for parents, can relate to multiple students)
             notifs = bakalari_reader.get_all_youth_by_parent()
+
             for notif in notifs:
                 issent = not (random.randint(0, 6) == 0)
                 isused = False
+
+                # the notification can only be used if it is already sent
                 if issent:
                     isused = (random.randint(0, 1) == 0)
                     if isused:
                         for i in notif:
+                            # choose a candidate for which to vote, or choose not to vote at all
                             val = random.randint(0, 3)
                             if val == 0:
                                 vot1 += 1
@@ -141,11 +158,17 @@ def addnewelection(start, end):
                                 vot3 += 1
                 new_notification = Notification(election=new_ele, sent=issent, used=isused)
                 new_notification.save()
+
+                # add a vote object for each of the related students
                 for idstud in notif:
                     new_vote = Vote(notification=new_notification, id_student=idstud)
                     new_vote.save()
+
+        # this is not a student election
         else:
+            # all the notifications that should be created (notifications for old enough students, each relates exactly to one student)
             notifs = bakalari_reader.get_all_oldenough()
+
             for idstud in notifs:
                 issent = not (random.randint(0, 7) == 0)
                 isused = False
@@ -164,6 +187,7 @@ def addnewelection(start, end):
                 new_vote = Vote(notification=new_notification, id_student=idstud)
                 new_vote.save()
     
+    # create and save the scores
     new_score1 = Score(election=new_ele, candidate=c1, votes=vot1)
     new_score2 = Score(election=new_ele, candidate=c2, votes=vot2)
     new_score3 = Score(election=new_ele, candidate=c3, votes=vot3)
@@ -171,21 +195,29 @@ def addnewelection(start, end):
     new_score2.save()
     new_score3.save()
 
-# generate a annotation for a candidate and an election
+"""
+Generates a string (a sentence) describing a generic candidate. Should be used as an annotation.
+"""
 def generateannotation():
     return "This candidate is " + genquality() + " and they live in " + capfirst(genword()) + "."
             
-# randomly chooses a personal first name
+"""
+Chooses a random first name from a predefined list. Should be used to generate candidate names.
+"""
 def genfirstname():
-    names = ["Mike", "Elis", "Ellinor", "Ralph", "Eduard", "Emil", "Frederick", "Frederic", "Frederik", "Leopold", "Maria", "Anthony", "Anna", "Valeria", "Alexandra"]
+    names = ["Mike", "Elis", "Ellinor", "Ralph", "Eduard", "Emil", "Frederick", "Frederic", "Frederik", "Leopold", "Maria", "Anthony", "Anna", "Valeria", "Alexandra", "Sigmund", "Pawel", "Andrei", "Simon", "Lisa", "Paula", "Nell", "Barbara"]
     return names[random.randint(0, len(names) - 1)]
 
-# randomly chooses an adjective (or equivalent) for auto-generated candidate annotations
+"""
+Chooses a random grammatical modifier. Typically includes an adjective. Should be used to generate annotations.
+"""
 def genquality():
     qualities = ["good", "very smelly", "excellent", "meh", "bad", "terrible", "fine", "awesome", "nice to old men", "funny"]
     return qualities[random.randint(0, len(qualities) - 1)]
 
-# generates and adds to the database a new random candidate
+"""
+Randomly generates a new candidate and adds them to the database.
+"""
 def addcandidate(stud):
     firstname = capfirst(genword()) + " " + genfirstname()
     lastname = capfirst(genword())
@@ -193,25 +225,28 @@ def addcandidate(stud):
     new_cand = Candidate(name=firstname, surname=lastname, is_student=stud, annotation=annotation)
     new_cand.save()
 
-# database override
-log("deleting all candidates")
+# clearing databases
+
+log("Deleting all candidates.")
 Candidate.objects.all().delete()
 
-log("creating new random candidates")
-for i in range(12):
-    addcandidate(random.randint(0, 1) == 0)
-
-log("creating student and non-student candidates")
-for i in range(3):
-    addcandidate(True)
-    addcandidate(False)
-
-log("deleting all elections, votes, notifications")
+log("Deleting all elections, votes, notifications.")
 Election.objects.all().delete()
 Vote.objects.all().delete()
 Notification.objects.all().delete()
 
-log("creating new elections: the already started ones also with votes and notifications")
+# adding new data
+
+log("Creating new random candidates.")
+for i in range(12):
+    addcandidate(random.randint(0, 1) == 0)
+
+log("Creating candidates some of which are required to be student, some non-student.")
+for i in range(3):
+    addcandidate(True)
+    addcandidate(False)
+
+log("Creating new elections: most of the already started ones also with votes and notifications.")
 for i in range(7):
     start = datearoundnow()
     addnewelection(start, enddate(start))
