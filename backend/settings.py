@@ -135,7 +135,7 @@ EMAIL_USE_TLS = True
 #EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = 'tmp/'
 EMAIL_SUBJECT = "Elektronické volby: {name}"
-EMAIL_TEMPLATE = "Elektronické volby: \n {name}\n\n{description} \n\nhlasujte pomocí kodu: {code} \n"
+EMAIL_TEMPLATE = "Elektronické volby: <br /> {name}<br /><br />{description} <br /><br />hlasujte pomocí odkazu <a href=\"https://hmmmm.magnusi.tech/#/election-voting/{code}\">ZDE</a> <br />"
 EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb: {name}"
 EMAIL_RESULTS_TEMPLATE = "Výsledky elektronických voleb jsou již upečeny.\n\n {candidate} \n\n Pro podrobnější výsledky voleb klikněte na odkaz: https://gjk.cz"
 
