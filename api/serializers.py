@@ -391,9 +391,8 @@ class ElectionGetResultsSerializer(serializers.BaseSerializer):
             total_votes = 0
             for score in Score.objects.filter(election=instance):
                 total_votes += score.votes;
-            if total_votes != 0:
-                response['candidates'] = []
-            for score in Score.objects.filter(election=instance):
+            response['candidates'] = []
+            for score in Score.objects.filter(election=instance).order_by('-votes'):
                 cand = {
                     'id': score.candidate.id,
                     'name': score.candidate.name,
