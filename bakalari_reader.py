@@ -4,7 +4,7 @@ from pytz import timezone
 from django.conf import settings
 
 tz = timezone(settings.TIME_ZONE)
-conn = sqlite3.connect('bakalari.db')
+conn = sqlite3.connect('demo.db')
 
 """
 Finds and returns the email of the parent of the student identified by the given id in the bakalari database.
