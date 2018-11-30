@@ -1,0 +1,4 @@
+docker stop $(docker ps -aq)
+docker rm $(docker ps -aq)
+docker build . -t elections
+docker run -p 8000:80 elections

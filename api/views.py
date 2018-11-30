@@ -47,7 +47,7 @@ class CandidateDetails(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ElectionList(generics.ListCreateAPIView):
-    queryset = Election.objects.all()
+    queryset = Election.objects.order_by('-end_date')
     get_serializer_class = get_serializer_getter(ElectionWriteSerializer, ElectionReadSerializer)
 
 
