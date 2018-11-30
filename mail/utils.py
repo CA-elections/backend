@@ -6,7 +6,6 @@ from django.conf import settings
 import datetime
 import bakalari_reader
 from pytz import timezone
-from django.db.models import Max
 
 tz = timezone(settings.TIME_ZONE)
 
@@ -61,10 +60,13 @@ def send_emails_with_results(election=None):
         if not n.votes.count():
             continue
         v = n.votes.first()
-        if(Score.objects.filter(election__pk=n.election.pk).order_by('-votes')[0].votes == Score.objects.filter(election__pk=n.election.pk).order_by('-votes')[1].votes):
-            election_results = "Volby skončili remízou"
+        data = Score.objects.filter(election__pk=n.election.pk).order_by('-votes')
+        if len(data) > 1 and data[0].votes == data[1].votes:
+            election_results = "Volby skončili remízou."
+        elif len(data) > 1:
+            election_results = "Volby vyhrál kandidát " + data.first().candidate.name+" "+data.first().candidate.surname+"."
         else:
-            election_results = "Volby vyhrál kandidát " + Score.objects.filter(election__pk=n.election.pk).order_by('-votes').first().candidate.name+" "+Score.objects.filter(election__pk=n.election.pk).order_by('-votes').first().candidate.surname
+            election_results = "Voleb se nezúčastnil žádný kadidát."
         if n.election.is_student:
             msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT.format(name=n.election.name), settings.EMAIL_RESULTS_TEMPLATE.format(candidate=election_results),
                                to=[bakalari_reader.get_student_email(v.id_student)])

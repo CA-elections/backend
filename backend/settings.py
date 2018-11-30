@@ -132,11 +132,11 @@ DEFAULT_FROM_EMAIL = 'noreply@gjk.cz'
 EMAIL_HOST_USER = 'cavolbymail@gmail.com'
 EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
-EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = 'tmp/'
-EMAIL_SUBJECT = "Elektronické volby do školské rady: {name}"
-EMAIL_TEMPLATE = "Elektronické volby do školské rady: \n {name}\n\n{description} \n\nhlasujte pomocí kodu: {code} \n"
-EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb do školní rady: {name}"
+EMAIL_SUBJECT = "Elektronické volby: {name}"
+EMAIL_TEMPLATE = "Elektronické volby: \n {name}\n\n{description} \n\nhlasujte pomocí kodu: {code} \n"
+EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb: {name}"
 EMAIL_RESULTS_TEMPLATE = "Výsledky elektronických voleb jsou již upečeny.\n\n {candidate} \n\n Pro podrobnější výsledky voleb klikněte na odkaz: https://gjk.cz"
 
 # Printing info to console
