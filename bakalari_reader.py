@@ -41,20 +41,29 @@ def get_all_youth_by_parent():
             filtered.append(stud)
 
     
-    # 
+    # notif - an array of student ids with the same parent email
     notifs = []
-    last = 0
+    # the first index in the filtered array with the current parent email
+    first = 0
     for i in range(len(filtered)):
         if (i == len(filtered) - 1 or filtered[i][2] != filtered[i + 1][2]):
-            notifs.append([filtered[x][0] for x in range(last, i + 1)])
-            last = i + 1
+            notifs.append([filtered[x][0] for x in range(first, i + 1)])
+            first = i + 1
     return notifs
 
-
+"""
+Returns ids of all adult students in the bakalari database in a plain array.
+"""
 def get_all_oldenough():
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(tz)
+
+    # adult students have birthday before or at this datetime
     dt = datetime.date(now.year - 18, now.month, now.day)
+
+    # all students with non-empty email and birthdate
     students = conn.cursor().execute("SELECT ID, Birthdate FROM bakalari WHERE \"Email\" <> \"\" AND Birthdate <> \"\";").fetchall()
+
+    # filter only ids of adult students
     notifs = []
     for stud in students:
         day, month, year = map(int, stud[1].split('.'))
