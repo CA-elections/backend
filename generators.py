@@ -76,7 +76,6 @@ def genword():
     for i in range(3):
         outstr += genconsonant()
         outstr += genvowel()
-    outstr += "ča34raqéítáqčrqý=ťř"
     return outstr
 
 
