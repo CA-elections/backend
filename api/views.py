@@ -105,7 +105,7 @@ class ElectionGetAll(generics.ListAPIView):
             "name": name
         }
     """
-    queryset = Election.objects.all()
+    queryset = Election.objects.order_by('-end_date')
     serializer_class = ElectionGetAllSerializer
 
 
@@ -372,7 +372,7 @@ class AdminElectionWriteSpecial(viewsets.ViewSet):
 
         if "candidates" not in request.data:
             return response.Response({
-                "error": "is_student field required."
+                "error": "candidates field required."
             }, status=status.HTTP_400_BAD_REQUEST)
         candidates_data = request.data.pop("candidates")
 

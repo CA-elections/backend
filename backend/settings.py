@@ -139,7 +139,7 @@ EMAIL_TEMPLATE = "Elektronické volby: <br /> {name}<br /><br />{description} <b
 EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb: {name}"
 EMAIL_RESULTS_TEMPLATE = "Výsledky elektronických voleb jsou již upečeny.\n\n {candidate} \n\n Pro podrobnější výsledky voleb klikněte na odkaz: https://gjk.cz"
 
-# Printing info to console
+# whether info is printed to console
 
 VERBOSE = True
 
