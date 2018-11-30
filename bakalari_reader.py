@@ -6,6 +6,7 @@ from django.conf import settings
 tz = timezone(settings.TIME_ZONE)
 conn = sqlite3.connect('demo.db')
 
+
 def get_parent_email(student_id):
     return conn.cursor().execute("SELECT \"Parent Email\" FROM bakalari WHERE ID=(?);", [str(student_id)]).fetchone()[0]
 

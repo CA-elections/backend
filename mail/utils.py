@@ -30,6 +30,7 @@ def send_emails_with_code(election=None):
                                to=[bakalari_reader.get_student_email(v.id_student)])
         else:
             msg = EmailMessage(settings.EMAIL_SUBJECT.format(name=n.election.name), settings.EMAIL_TEMPLATE.format(code=n.code, description=n.election.description, name=n.election.name), to=[bakalari_reader.get_parent_email(v.id_student)])
+        msg.content_subtype = "html"
         try:
             msg.send()
         except SMTPException:
