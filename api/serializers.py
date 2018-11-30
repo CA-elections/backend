@@ -256,7 +256,7 @@ class AdminElectionReadSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         possible_votes = 0
         for notif in Notification.objects.filter(election=instance):
-            possible_votes += Vote.objects.filter(notification=notif)
+            possible_votes += Vote.objects.filter(notification=notif).count()
         votes_cast = 0
         for score in Score.objects.filter(election=instance):
             votes_cast += score.votes
@@ -325,6 +325,9 @@ class AdminElectionWriteSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+    def to_representation(self, instance):
+        return { 'id': instance.id }
 
     class Meta:
         model = Election

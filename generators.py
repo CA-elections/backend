@@ -37,11 +37,13 @@ def datearoundnow():
 
     return datetime.datetime.now(tz) + datetime.timedelta(days)
 
+
 """
 Generates a random datetime a few days after the datetime given.
 """
 def enddate(startdate):
     return startdate + datetime.timedelta(days=random.randint(2, 7))
+
 
 """
 Chooses a random vowel (consits of one or two characters).
@@ -49,6 +51,7 @@ Chooses a random vowel (consits of one or two characters).
 def genvowel():
     vowels = ['a', 'e', 'i', 'o', 'u', 'y', 'oe', 'ue', 'ae', 'ou']
     return vowels[random.randint(0, len(vowels) - 1)]
+
 
 """
 Chooses a random consonant.
@@ -64,6 +67,7 @@ def genconsonant():
         if (not fail):
             return str(chr(num))
 
+
 """
 Generates a word, few characters long and with no meaning, which is pronouncable due to an adequate combination of consonants and vowels.
 """
@@ -72,7 +76,9 @@ def genword():
     for i in range(3):
         outstr += genconsonant()
         outstr += genvowel()
+    outstr += "ča34raqéítáqčrqý=ťř"
     return outstr
+
 
 """
 Chooses a random verb from a predefined list. Can include multiple words, such as prepositions.
@@ -81,6 +87,7 @@ def genverb():
     verbs = ['see', 'take', 'welcome', 'amuse', 'turn', 'flip', 'narrow', 'expand', 'walk with', 'talk to', 'do not be scared by', 'await', 'search for']
     return verbs[random.randint(0, len(verbs) - 1)]
 
+
 """
 Chooses a random subject from a predefined list to be used in a sentence. Can include multiple words, typically includes a noun.
 """
@@ -88,11 +95,13 @@ def gennoun():
     nouns = ['the hill', 'the Sun', 'the Earth', 'the numbers', 'the flowers', 'me', 'everyone', 'a cup', 'any thought', 'the rest of the cake', 'aliens', 'philosophy', 'fun', 'power', 'an end']
     return nouns[random.randint(0, len(nouns) - 1)]
 
+
 """
 Returns the given string with the first character capitalized.
 """
 def capfirst(word):
     return word[0].capitalize() + word[1:]
+
 
 """
 Randomly generates a new election and adds it to the database.
@@ -195,12 +204,14 @@ def addnewelection(start, end):
     new_score2.save()
     new_score3.save()
 
+
 """
 Generates a string (a sentence) describing a generic candidate. Should be used as an annotation.
 """
 def generateannotation():
     return "This candidate is " + genquality() + " and they live in " + capfirst(genword()) + "."
-            
+
+
 """
 Chooses a random first name from a predefined list. Should be used to generate candidate names.
 """
@@ -208,12 +219,14 @@ def genfirstname():
     names = ["Mike", "Elis", "Ellinor", "Ralph", "Eduard", "Emil", "Frederick", "Frederic", "Frederik", "Leopold", "Maria", "Anthony", "Anna", "Valeria", "Alexandra", "Sigmund", "Pawel", "Andrei", "Simon", "Lisa", "Paula", "Nell", "Barbara"]
     return names[random.randint(0, len(names) - 1)]
 
+
 """
 Chooses a random grammatical modifier. Typically includes an adjective. Should be used to generate annotations.
 """
 def genquality():
     qualities = ["good", "very smelly", "excellent", "meh", "bad", "terrible", "fine", "awesome", "nice to old men", "funny"]
     return qualities[random.randint(0, len(qualities) - 1)]
+
 
 """
 Randomly generates a new candidate and adds them to the database.
@@ -224,6 +237,7 @@ def addcandidate(stud):
     annotation=generateannotation()
     new_cand = Candidate(name=firstname, surname=lastname, is_student=stud, annotation=annotation)
     new_cand.save()
+
 
 # clearing databases
 

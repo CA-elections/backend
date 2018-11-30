@@ -4,8 +4,7 @@ from pytz import timezone
 from django.conf import settings
 
 tz = timezone(settings.TIME_ZONE)
-conn = sqlite3.connect('demo1.db')
-
+conn = sqlite3.connect('bakalari.db')
 
 def get_parent_email(student_id):
     return conn.cursor().execute("SELECT \"Parent Email\" FROM bakalari WHERE ID=(?);", [str(student_id)]).fetchone()[0]
@@ -39,6 +38,7 @@ def get_students_with_parent_email(parent_email):
 def get_students():
     yield from map(int, map(lambda x: x[0], conn.cursor().execute("SELECT ID FROM bakalari;")))
 
+
 def get_all_youth_by_parent():
     now = datetime.datetime.now()
     dt = datetime.date(now.year - 18, now.month, now.day)
@@ -57,6 +57,7 @@ def get_all_youth_by_parent():
             notifs.append([filtered[x][0] for x in range(last, i + 1)])
             last = i + 1
     return notifs
+
 
 def get_all_oldenough():
     now = datetime.datetime.now()
