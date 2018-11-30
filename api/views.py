@@ -158,12 +158,12 @@ class AdminElectionDetails(generics.RetrieveUpdateDestroyAPIView):
 
 class ElectionGetResults(generics.RetrieveAPIView):
     """
-    Returns information about one election identified by it's ID in this format:\n
+    Available to any user (does not need admin access). Returns information about one election identified by it's ID in this format:\n
         {
             "id": ID of the election,
-            "date_start": When has the election started,
-            "date_end": When will the election end,
-            "is_student": If is the election student,
+            "date_start": When the election starts,
+            "date_end": When the election ends,
+            "is_student": If the election is student,
             "name": The name of the election,
             "description": The description of the election,
             "candidates": [ Array of candidates with their info
@@ -173,10 +173,12 @@ class ElectionGetResults(generics.RetrieveAPIView):
                     "surname": Surname of the candidate,
                     "is_student": If is candidate student,
                     "annotation": Description of the candidate
-                    "votes": How many votes has the candidate
+                    (*) "percentage": The fraction of votes cast the candidate has got (between 0 and 1)
                 }
             ]
         }
+       (*) only sends the percentage if the election has already ended 
+        
     """
 
     queryset = Election.objects.all()
@@ -185,19 +187,10 @@ class ElectionGetResults(generics.RetrieveAPIView):
 
 class NotificationInfo(generics.RetrieveAPIView):
     """
-        Returns how many votes does a notification have and general info about candidates in the relevant election\n
+        Returns how many votes a notification has and the election id this notification is linked to\n
             {
                 "election_id": Id of the relevant election
                 "votes_available": Number of votes available for the notification
-                "candidates": [ Array of candidates with their info
-                    {
-                        "id": ID of the candidate,
-                        "name": Name of the candidate,
-                        "surname": Surname of the candidate,
-                        "is_student": If is candidate student,
-                        "annotation": Description of the candidate
-                    }
-                ]
             }
     """
     queryset = Notification.objects.all()
@@ -209,10 +202,10 @@ class NotificationVote(viewsets.ViewSet):
 
     description = """
     Endpoint for voting. Returns how many votes were used and how many were available.\n
-    {
-        "votes_available": Number of votes that were available
-        "votes_used": Number of votes used
-    }
+        {
+            "votes_available": Number of votes that were available
+            "votes_used": Number of votes used
+        }
     """
     schema = ManualSchema(encoding="application/json", description=description, fields=[
         coreapi.Field(
@@ -299,4 +292,113 @@ class NotificationVote(viewsets.ViewSet):
         return response.Response({
             "votes_available": votes_available,
             "votes_used": votes_used
+        }, status=status.HTTP_202_ACCEPTED)
+
+
+class AdminElectionWriteSpecial(viewsets.ViewSet):
+
+    description = """
+    Special endpoint for creating an election that also creates all the students for the election.\n
+    WARNING: We shouldn't be doing this. Frontend should create all the students individually and then create an eleciton.\n
+    Response:
+    {
+        "id": Id of the created election
+    }\n
+    The "candidates" array in the request body json should contain json objects each representing a candidate structured like this:\n
+    {
+        "name": Name of the candidate,
+        "surname": Surname of the candidate,
+        "is_student": If the candidate is a student (not required),
+        "annotation": Short description of the candidate (not required)
+    }
+    """
+    schema = ManualSchema(encoding="application/json", description=description, fields=[
+        coreapi.Field(
+            "date_start",
+            required=True,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "date_end",
+            required=True,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "is_student",
+            required=False,
+            location="form",
+            schema=coreschema.Boolean()
+        ),
+        coreapi.Field(
+            "name",
+            required=True,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "description",
+            required=False,
+            location="form",
+            schema=coreschema.String()
+        ),
+        coreapi.Field(
+            "candidates",
+            required=True,
+            location="form",
+            schema=coreschema.Array()
+        )
+    ])
+
+    @staticmethod
+    def create(request):
+
+        # Check the request data
+        if "date_start" not in request.data:
+            return response.Response({
+                "error": "date_start field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if "date_end" not in request.data:
+            return response.Response({
+                "error": "date_end field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if "name" not in request.data:
+            return response.Response({
+                "error": "name field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if "candidates" not in request.data:
+            return response.Response({
+                "error": "is_student field required."
+            }, status=status.HTTP_400_BAD_REQUEST)
+        candidates_data = request.data.pop("candidates")
+
+        for candidate_data in candidates_data:
+            if "name" not in candidate_data:
+                return response.Response({
+                    "error": "name field required inside all candidate objects."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if "surname" not in candidate_data:
+                return response.Response({
+                    "error": "surname field required inside all candidate objects."
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the election
+        election = Election(**request.data)
+        election.save()
+
+        # Create all the candidates
+        # (if something were to happen to the server, there will be zombie candidates without an election)
+        for candidate_data in candidates_data:
+            candidate = Candidate(**candidate_data)
+            candidate.save()
+            score = Score(candidate=candidate, election=election)
+            score.save()
+
+        return response.Response({
+            "id": election.id
         }, status=status.HTTP_202_ACCEPTED)
