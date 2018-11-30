@@ -302,7 +302,7 @@ class AdminElectionWriteSpecial(viewsets.ViewSet):
     WARNING: We shouldn't be doing this. Frontend should create all the students individually and then create an eleciton.\n
     Response:
     {
-        TODO
+        "id": Id of the created election
     }\n
     The "candidates" array in the request body json should contain json objects each representing a candidate structured like this:\n
     {
@@ -400,5 +400,5 @@ class AdminElectionWriteSpecial(viewsets.ViewSet):
             score.save()
 
         return response.Response({
-            "election_id": election.id
+            "id": election.id
         }, status=status.HTTP_202_ACCEPTED)
