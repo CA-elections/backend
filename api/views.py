@@ -105,7 +105,7 @@ class ElectionGetAll(generics.ListAPIView):
             "name": name
         }
     """
-    queryset = Election.objects.all()
+    queryset = Election.objects.order_by('-end_date')
     serializer_class = ElectionGetAllSerializer
 
 
