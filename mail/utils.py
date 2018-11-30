@@ -63,7 +63,7 @@ def send_emails_with_results(election=None):
         data = Score.objects.filter(election__pk=n.election.pk).order_by('-votes')
         if len(data) > 1 and data[0].votes == data[1].votes:
             election_results = "Volby skončili remízou."
-        elif len(data) > 1:
+        elif len(data) > 0:
             election_results = "Volby vyhrál kandidát " + data.first().candidate.name+" "+data.first().candidate.surname+"."
         else:
             election_results = "Voleb se nezúčastnil žádný kadidát."
