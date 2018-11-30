@@ -12,7 +12,7 @@ tz = timezone(settings.TIME_ZONE)
 def generate_notifications():
     now = datetime.datetime.now(tz)
     for election in Election.objects.filter(are_notifs_generated=False, date_start__lte=now, date_end__gt=now):
-        #log("generating notifications (and votes) for an election (name: " + election.name + ")") # This crashes with czech chars
+        log("generating notifications (and votes) for an election (name: " + election.name + ")") # This crashes with czech chars
         log("election started at " + str(election.date_start))
         if not election.is_student:
             notifs = bakalari_reader.get_all_youth_by_parent()
