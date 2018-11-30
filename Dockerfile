@@ -14,9 +14,8 @@ ADD . /src
 
 RUN cd /src/frontend; npm install
 RUN npm install webpack
-RUN cd /src/frontend; /src/frontend/node_modules/.bin/webpack
+RUN cd /src/frontend; /src/frontend/node_modules/.bin/webpack || true
 RUN cd /
-RUN mkdir /src/frontend/static
 RUN mv /src/frontend/dist /src/frontend/static/dist
 RUN mv /src/frontend/node_modules /src/frontend/static/node_modules
 
