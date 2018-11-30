@@ -26,10 +26,10 @@ def send_emails_with_code(election=None):
             continue
         v = n.votes.first()
         if n.election.is_student:
-            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name=n.election.name), settings.EMAIL_TEMPLATE.format(code=n.code, description=n.election.description, name=n.election.name),
+            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name="do školního parlamentu - studentské"), settings.EMAIL_TEMPLATE.format(code=n.code, name="do školního parlamentu - studentské"),
                                to=[bakalari_reader.get_student_email(v.id_student)])
         else:
-            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name=n.election.name), settings.EMAIL_TEMPLATE.format(code=n.code, description=n.election.description, name=n.election.name), to=[bakalari_reader.get_parent_email(v.id_student)])
+            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name="do školního parlamentu"), settings.EMAIL_TEMPLATE.format(code=n.code, name="do školního parlamentu"), to=[bakalari_reader.get_parent_email(v.id_student)])
         msg.content_subtype = "html"
         try:
             msg.send()
@@ -69,10 +69,14 @@ def send_emails_with_results(election=None):
         else:
             election_results = "Voleb se nezúčastnil žádný kadidát."
         if n.election.is_student:
-            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT.format(name=n.election.name), settings.EMAIL_RESULTS_TEMPLATE.format(candidate=election_results),
+            election_name = "do školního parlamentu - studenské"
+        else:
+            election_name = "do školního parlamentu"
+        if n.election.is_student:
+            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT.format(name=election_name), settings.EMAIL_RESULTS_TEMPLATE.format(candidate=election_results),
                                to=[bakalari_reader.get_student_email(v.id_student)])
         else:
-            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT.format(name=n.election.name), settings.EMAIL_RESULTS_TEMPLATE.format(candidate=election_results),
+            msg = EmailMessage(settings.EMAIL_RESULTS_SUBJECT.format(name=election_name), settings.EMAIL_RESULTS_TEMPLATE.format(candidate=election_results),
                                to=[bakalari_reader.get_parent_email(v.id_student)])
         if results_not_send:
             msg.send(fail_silently=True)
