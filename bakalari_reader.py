@@ -44,7 +44,7 @@ Finds and returns the email of the student identified by the given id in the bak
 x
 """
 def get_student_email(student_id):
-    cursor = con.cursor()
+    cursor = conn.cursor()
     cursor.execute('use bakalari_data')
     return cursor.execute("SELECT E_MAIL FROM zaci WHERE INTERN_KOD=(?);", [str(student_id)]).fetchone()[0]
 
@@ -54,7 +54,7 @@ Returns ids of all underage students in the bakalari database grouped by parent 
 Returns an array of arrays. Each subarray contains ids of students with a common parent email. No two ids from different subarrays have the same parent email.
 """
 def get_all_youth_by_parent():
-    cursor = con.cursor()
+    cursor = conn.cursor()
     cursor.execute('use bakalari_data')
     now = datetime.datetime.now(tz)
 
@@ -78,11 +78,11 @@ def get_all_youth_by_parent():
             ON
             zaci_zzr.ID_ZZ=zaci_zzd.ID
         WHERE
-            TRIM(zaci_zzd.E_EMAIL) IS NOT NULL
+            LTRIM(RTRIM(zaci_zzd.E_EMAIL)) IS NOT NULL
         AND
-            TRIM(zaci.DATUM_NAR) IS NOT NULL
+            LTRIM(RTRIM(zaci.DATUM_NAR)) IS NOT NULL
         ORDER BY
-            zaci_zzd.EMAIL;""").fetchall()
+            zaci_zzd.E_MAIL;""").fetchall()
 
     # adult students filtered out
     filtered = []
@@ -107,7 +107,7 @@ def get_all_youth_by_parent():
 Returns ids of all adult students in the bakalari database in a plain array.
 """
 def get_all_oldenough():
-    cursor = con.cursor()
+    cursor = conn.cursor()
     cursor.execute('use bakalari_data')
     now = datetime.datetime.now(tz)
 
@@ -122,9 +122,9 @@ def get_all_oldenough():
         FROM
             zaci
         WHERE
-            TRIM(E_MAIL) IS NOT NULL
+            LTRIM(RTRIM(E_MAIL)) IS NOT NULL
         AND
-            TRIM(DATUM_NAR) IS NOT NULL;""").fetchall()
+            LTRIM(RTRIM(DATUM_NAR)) IS NOT NULL;""").fetchall()
 
     # filter only ids of adult students
     notifs = []
