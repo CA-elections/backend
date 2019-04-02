@@ -20,6 +20,8 @@ conn = pyodbc.connect('DSN=MySQLServerDatabase;UID=uzivatelske_jmeno;PWD=heslo_u
 Finds and returns the email of the parent of the student identified by the given id in the bakalari database.
 """
 def get_parent_email(student_id):
+    cursor = conn.cursor()
+    cursor.execute('use bakalari_data')
     return cursor.execute("""
         SELECT
             zaci_zzd.E_MAIL
@@ -78,7 +80,7 @@ def get_all_youth_by_parent():
             ON
             zaci_zzr.ID_ZZ=zaci_zzd.ID
         WHERE
-            LTRIM(RTRIM(zaci_zzd.E_EMAIL)) IS NOT NULL
+            LTRIM(RTRIM(zaci_zzd.E_MAIL)) IS NOT NULL
         AND
             LTRIM(RTRIM(zaci.DATUM_NAR)) IS NOT NULL
         ORDER BY
