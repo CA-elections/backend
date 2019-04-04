@@ -23,8 +23,8 @@ RUN cd /src/frontend; npm install
 RUN npm install webpack
 RUN cd /src/frontend; /src/frontend/node_modules/.bin/webpack --define process.env.URL="'volby.gjk.cz'" || true
 RUN cd /
-RUN mv /src/frontend/dist /src/frontend/static/dist
-RUN mv /src/frontend/node_modules /src/frontend/static/node_modules
+RUN ln -s /src/frontend/dist /src/frontend/static/dist
+RUN ln -s /src/frontend/node_modules /src/frontend/static/node_modules
 
 RUN python /src/manage.py makemigrations
 RUN python /src/manage.py makemigrations api
