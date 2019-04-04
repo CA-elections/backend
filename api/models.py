@@ -34,7 +34,7 @@ class Notification(models.Model):
 class Vote(models.Model):
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name='votes')
 
-    id_student = models.IntegerField()
+    id_student = models.TextField()
 
 
 class Score(models.Model):

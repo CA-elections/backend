@@ -1,5 +1,5 @@
 FROM python:stretch
-MAINTAINER webmaster@gjk.cz
+MAINTAINER volby@gjk.cz
 
 ENV PYTHONBUFFERED 1
 
@@ -21,7 +21,7 @@ ADD . /src
 
 RUN cd /src/frontend; npm install
 RUN npm install webpack
-RUN cd /src/frontend; /src/frontend/node_modules/.bin/webpack --define process.env.URL="'localhost:8000'" || true
+RUN cd /src/frontend; /src/frontend/node_modules/.bin/webpack --define process.env.URL="'volby.gjk.cz'" || true
 RUN cd /
 RUN mv /src/frontend/dist /src/frontend/static/dist
 RUN mv /src/frontend/node_modules /src/frontend/static/node_modules
@@ -29,8 +29,9 @@ RUN mv /src/frontend/node_modules /src/frontend/static/node_modules
 RUN python /src/manage.py makemigrations
 RUN python /src/manage.py makemigrations api
 RUN python /src/manage.py migrate
-RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('user', 'webmaster@gjk.cz', 'user')" | python manage.py shell
+RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('user', 'volby@gjk.cz', 'test')" | python manage.py shell; exit 0
 RUN python /src/manage.py collectstatic
+RUN python /src/setupdaemon.py &
 
 CMD ["python", "/src/manage.py" , "runserver", "0.0.0.0:80"]
 EXPOSE 80
