@@ -130,7 +130,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 
 DEFAULT_FROM_EMAIL = 'noreply@gjk.cz'
-EMAIL_HOST_USER = 'cavolbymail@gmail.com'
+EMAIL_HOST_USER = 'volby@gjk.cz'
 EMAIL_HOST_PASSWORD = 'CaVolbyMail1234'
 EMAIL_USE_TLS = True
 #EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
@@ -138,7 +138,7 @@ EMAIL_FILE_PATH = 'tmp/'
 EMAIL_SUBJECT = "Elektronické volby {name}"
 EMAIL_TEMPLATE = "Elektronické volby: <br /> {name}<br /><br />hlasujte pomocí odkazu <a href=\"https://volby.gjk.cz/#/election-voting/{code}\">ZDE</a> <br />"
 EMAIL_RESULTS_SUBJECT = "Výsledky elektronických voleb {name}"
-EMAIL_RESULTS_TEMPLATE = "Výsledky elektronických voleb jsou již upečeny.\n\n {candidate} \n\n Pro podrobnější výsledky voleb klikněte na odkaz: https://gjk.cz"
+EMAIL_RESULTS_TEMPLATE = "Volby již skončily. <br><br> Vítězem se stal/a {candidate}. <br><br> Pro podrobnější výsledky voleb klikněte na odkaz: https://volby.gjk.cz"
 
 # whether info is printed to console
 
