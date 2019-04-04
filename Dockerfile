@@ -12,6 +12,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/debian/9/prod.list > /etc/apt/sources.list.d/mssql-release.list
 RUN apt-get -y update
 RUN env ACCEPT_EULA=Y apt-get -y install unixodbc-dev msodbcsql17
+RUN odbcinst -i -s -f db.ini -l
 ADD requirements.txt /src/
 RUN pip install --no-cache-dir -r /src/requirements.txt
 RUN curl -sL https://deb.nodesource.com/setup_11.x | bash -
