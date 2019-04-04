@@ -26,13 +26,15 @@ def send_emails_with_code(election=None):
             continue
         v = n.votes.first()
         if n.election.is_student:
+            print("email:");
+            print(bakalari_reader.get_student_email(v.id_student))
             msg = EmailMessage(settings.EMAIL_SUBJECT.format(name="do školního parlamentu - studentské"), settings.EMAIL_TEMPLATE.format(code=n.code, name="do školního parlamentu - studentské"),
-                               to=[bakalari_reader.get_student_email(v.id_student)])
+                               to=[bakalari_reader.get_student_email(v.id_student).strip()])
         else:
-            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name="do školního parlamentu"), settings.EMAIL_TEMPLATE.format(code=n.code, name="do školního parlamentu"), to=[bakalari_reader.get_parent_email(v.id_student)])
+            msg = EmailMessage(settings.EMAIL_SUBJECT.format(name="do školního parlamentu"), settings.EMAIL_TEMPLATE.format(code=n.code, name="do školního parlamentu"), to=[bakalari_reader.get_parent_email(v.id_student).strip()])
         msg.content_subtype = "html"
         try:
-            msg.send()
+            print(msg); msg.send()
         except SMTPException:
             pass
         else:
