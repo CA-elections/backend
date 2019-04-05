@@ -32,7 +32,8 @@ RUN python /src/manage.py makemigrations api
 RUN python /src/manage.py migrate
 RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('user', 'volby@gjk.cz', 'test')" | python manage.py shell; exit 0
 RUN python /src/manage.py collectstatic
-RUN python /src/setupdaemon.py &
+RUN cd /src; nohup ./setupdaemon.py > daemonlog &
 
-CMD ["python", "/src/manage.py" , "runserver", "0.0.0.0:80"]
+WORKDIR "/src"
+CMD ["./start.sh"]
 EXPOSE 80
